@@ -35,9 +35,9 @@
                     ClipToBounds="True">
                 <Grid Margin = "10 0 10 0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
                     <Label Content="Settings" FontSize="16"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Open after Exit" />
-                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Without Repetitions" />
-                    <TextBox Grid.Row="2" Grid.Column = "0" Grid.ColumnSpan="2" >Path to file with Playlists</TextBox>
+                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Open after Exit" IsChecked="{Binding OpenFileAfterExit}"/>
+                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Without Repetitions" IsChecked="{Binding WithoutRepetition}" />
+                    <TextBox Grid.Row="2" Grid.Column = "0" Grid.ColumnSpan="2" Text="{Binding PathToFile}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace RandomPiker;
+namespace RandomPicker.App;
 
 sealed class Program
 {

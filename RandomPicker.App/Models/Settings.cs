@@ -1,4 +1,4 @@
-﻿namespace RandomPiker.Models;
+﻿namespace RandomPicker.App.Models;
 
 public class Settings
 {

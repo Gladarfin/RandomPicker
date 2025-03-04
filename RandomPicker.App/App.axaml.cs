@@ -4,10 +4,10 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using RandomPiker.ViewModels;
-using RandomPiker.Views;
+using RandomPicker.App.ViewModels;
+using RandomPicker.App.Views;
 
-namespace RandomPiker;
+namespace RandomPicker.App;
 
 public partial class App : Application
 {

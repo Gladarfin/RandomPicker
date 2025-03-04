@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace RandomPiker.ViewModels;
+namespace RandomPicker.App.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
-using RandomPiker.Models;
+using RandomPicker.App.Models;
 
-namespace RandomPiker.Services;
+namespace RandomPicker.App.Services;
 
 public class YoutubeApiService
 {

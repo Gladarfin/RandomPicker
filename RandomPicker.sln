@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomPiker", "RandomPiker\RandomPiker.csproj", "{C6BFB87B-C0E6-44B1-BA31-1628329D6A94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomPicker", "RandomPicker.App\RandomPicker.App.csproj", "{C6BFB87B-C0E6-44B1-BA31-1628329D6A94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

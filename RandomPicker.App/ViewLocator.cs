@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using RandomPiker.ViewModels;
+using RandomPicker.App.ViewModels;
 
-namespace RandomPiker;
+namespace RandomPicker.App;
 
 public class ViewLocator : IDataTemplate
 {

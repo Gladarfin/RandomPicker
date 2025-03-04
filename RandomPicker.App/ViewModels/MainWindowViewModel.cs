@@ -1,4 +1,4 @@
-﻿namespace RandomPiker.ViewModels;
+﻿namespace RandomPicker.App.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {

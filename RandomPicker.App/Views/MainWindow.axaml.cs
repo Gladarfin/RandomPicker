@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace RandomPiker.Views;
+namespace RandomPicker.App.Views;
 
 public partial class MainWindow : Window
 {

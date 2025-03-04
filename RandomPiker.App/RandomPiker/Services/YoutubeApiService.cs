@@ -1,0 +1,54 @@
+﻿using System.Text.Json;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
+using RandomPiker.Models;
+
+namespace RandomPiker.Services;
+
+public class YoutubeApiService
+{
+    private static Settings _appSettings = new();
+
+    public YoutubeApiService()
+    {
+        const string settingsJsonFile = "Settings.json";
+        var jsonContent = File.ReadAllText(settingsJsonFile);
+        _appSettings = JsonSerializer.Deserialize<Settings>(jsonContent);
+    }
+    
+    static async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)
+    {
+        var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+        {
+            ApiKey = _appSettings.ApiKey,
+            ApplicationName = _appSettings.ApplicationName
+        });
+
+        var videos = new List<string>();
+
+        foreach (var list in playlists)
+        {
+            var playlistItemRequest = youtubeService.PlaylistItems.List("snippet");
+            playlistItemRequest.PlaylistId = list;
+            playlistItemRequest.MaxResults = 50;
+
+            PlaylistItemListResponse response;
+            do
+            {
+                response = await playlistItemRequest.ExecuteAsync();
+
+                videos.AddRange(response.Items.Select(item => item.Snippet.ResourceId.VideoId));
+
+                playlistItemRequest.PageToken = response.NextPageToken;
+            } while (!string.IsNullOrEmpty(response.NextPageToken));
+        }
+
+        return videos;
+    }
+}

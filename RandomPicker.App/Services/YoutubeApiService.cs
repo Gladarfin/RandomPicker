@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,9 +18,8 @@ public class YoutubeApiService
 
     public YoutubeApiService()
     {
-        const string settingsJsonFile = "Settings.json";
-        var jsonContent = File.ReadAllText(settingsJsonFile);
-        _appSettings = JsonSerializer.Deserialize<Settings>(jsonContent);
+        var pathToFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RandomPiker.App\\Config", "Settings.json");
+        _appSettings = LoadSettings.Load(pathToFile);
     }
     
     static async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)

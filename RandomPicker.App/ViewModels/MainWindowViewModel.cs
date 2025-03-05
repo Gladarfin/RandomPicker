@@ -1,13 +1,19 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using ReactiveUI;
+
 
 namespace RandomPicker.App.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public double DropDownHeight { get; set; } = 150;
     private bool _openFileAfterExit;
     private bool _withoutRepetition;
     private string _pathToFile = "Path not set";
+    private bool _isExiting = false;
     
     public bool OpenFileAfterExit
     {
@@ -30,6 +36,33 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WithoutRepetition));
         }
     }
+    
+    public double DropDownHeight { get; } = 150;
+    
+    //Commands
+    public ICommand ExitCommand { get; }
+    
+    public MainWindowViewModel()
+    {
+        ExitCommand = ReactiveCommand.Create(ExitApplication);
+    }
+
+    private void ExitApplication()
+    {
+        if (_isExiting) return;
+        _isExiting = true;
+        
+        if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            Console.WriteLine("Run!!!");
+            desktop.Shutdown();
+        }
+
+        _isExiting = false;
+    }
+    
+    public bool IsExiting() => _isExiting;
+    
     public string PathToFile
     {
         get => _pathToFile;

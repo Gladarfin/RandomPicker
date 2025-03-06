@@ -18,11 +18,11 @@ public class YoutubeApiService
 
     public YoutubeApiService()
     {
-        var pathToFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RandomPiker.App\\Config", "Settings.json");
+        var pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
         _appSettings = LoadSettings.Load(pathToFile);
     }
     
-    static async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)
+    public async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)
     {
         var youtubeService = new YouTubeService(new BaseClientService.Initializer()
         {

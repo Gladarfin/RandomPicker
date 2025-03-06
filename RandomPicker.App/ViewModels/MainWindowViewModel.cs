@@ -1,5 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -13,7 +14,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _openFileAfterExit;
     private bool _withoutRepetition;
     private string _pathToFile = "Path not set";
-    private bool _isExiting = false;
+    private bool _isExiting;
     
     public bool OpenFileAfterExit
     {
@@ -37,14 +38,22 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
     
-    public double DropDownHeight { get; } = 150;
-    
+    public double DropDownHeight => 150;
+
     //Commands
     public ICommand ExitCommand { get; }
+    public ICommand CompositeCommand { get; }
     
+    //ViewModels
+    public GenerateRandomViewModel GenerateRandomVM { get; }
+    public YoutubeServiceViewModel YoutubeServiceVM { get; }
+
     public MainWindowViewModel()
     {
+        GenerateRandomVM = new GenerateRandomViewModel();
+        YoutubeServiceVM = new YoutubeServiceViewModel();
         ExitCommand = ReactiveCommand.Create(ExitApplication);
+        CompositeCommand = ReactiveCommand.CreateFromTask(ExecuteCompositeCommandAsync);
     }
 
     private void ExitApplication()
@@ -54,11 +63,17 @@ public partial class MainWindowViewModel : ViewModelBase
         
         if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            Console.WriteLine("Run!!!");
+            //Some logic before close the app, like save settings if changed etc
             desktop.Shutdown();
         }
 
         _isExiting = false;
+    }
+
+    private async Task ExecuteCompositeCommandAsync()
+    {
+        await YoutubeServiceVM.FetchVideosCommand.Execute();
+        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
     }
     
     public bool IsExiting() => _isExiting;

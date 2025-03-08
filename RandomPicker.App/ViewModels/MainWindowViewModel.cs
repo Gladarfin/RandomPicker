@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using DialogHostAvalonia;
 using ReactiveUI;
 
 
@@ -11,11 +12,14 @@ namespace RandomPicker.App.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    //private
     private bool _openFileAfterExit;
     private bool _withoutRepetition;
     private string _pathToFile = "Path not set";
     private bool _isExiting;
+    private Control _dialogBox;
     
+    //public
     public bool OpenFileAfterExit
     {
         get => _openFileAfterExit;
@@ -37,12 +41,22 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WithoutRepetition));
         }
     }
-    
+
+    public Control DialogBox
+    {
+        get => _dialogBox;
+        set
+        {
+            _dialogBox = value;
+            OnPropertyChanged(nameof(DialogBox));
+        }
+    }
     public double DropDownHeight => 150;
 
     //Commands
     public ICommand ExitCommand { get; }
-    public ICommand CompositeCommand { get; }
+    public ICommand GenerateRandomNumberCommand { get; }
+    public ICommand OpenDialogCommand { get; }
     
     //ViewModels
     public GenerateRandomViewModel GenerateRandomVM { get; }
@@ -52,11 +66,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         GenerateRandomVM = new GenerateRandomViewModel();
         YoutubeServiceVM = new YoutubeServiceViewModel();
-        ExitCommand = ReactiveCommand.Create(ExitApplication);
-        CompositeCommand = ReactiveCommand.CreateFromTask(ExecuteCompositeCommandAsync);
+        ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
+        OpenDialogCommand = ReactiveCommand.Create(ExecuteOpenDialogWithViewAsync);
+        GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
     }
 
-    private void ExitApplication()
+    private void ExecuteExitApplicationCommand()
     {
         if (_isExiting) return;
         _isExiting = true;
@@ -70,10 +85,16 @@ public partial class MainWindowViewModel : ViewModelBase
         _isExiting = false;
     }
 
-    private async Task ExecuteCompositeCommandAsync()
+    private void ExecuteGenerateRandomNumberCommand()
     {
-        await YoutubeServiceVM.FetchVideosCommand.Execute();
         GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
+    }
+
+    private async Task ExecuteOpenDialogWithViewAsync()
+    {
+        Application.Current.TryFindResource("DialogBoxResource", App.Current.ActualThemeVariant, out object dlgBox);
+        DialogBox = dlgBox as Control;
+        await DialogHost.Show(_dialogBox, "MainDialogHost");
     }
     
     public bool IsExiting() => _isExiting;

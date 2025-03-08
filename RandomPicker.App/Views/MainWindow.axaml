@@ -3,6 +3,7 @@
         xmlns:vm="using:RandomPicker.App.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
         Width="400" Height="500"
         x:Class="RandomPicker.App.Views.MainWindow"
@@ -14,18 +15,22 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-    <Grid x:Name="MainGrid" RowDefinitions="2*,Auto,*">
-        <Grid x:Name="Information" RowDefinitions="2*, Auto, Auto"
-              Grid.Row = "0" Margin="0 10">
-            <TextBlock TextAlignment="Center" Margin="0 20 0 0" FontSize="80" FontWeight="Bold"
-                       Text="{Binding GenerateRandomVM.RandomNumber}"/>
+     <dialogHostAvalonia:DialogHost Identifier="MainDialogHost"
+                                DialogMargin="16"
+                                dialogHostAvalonia:DialogHostStyle.CornerRadius="8">
+        <Grid x:Name="MainGrid" RowDefinitions="2*,Auto,*">
+            <ContentControl Content="{Binding DialogBox}"></ContentControl>
+            <Grid x:Name="Information" RowDefinitions="2*, Auto, Auto"
+                  Grid.Row = "0" Margin="0 10">
+                <TextBlock TextAlignment="Center" Margin="0 20 0 0" FontSize="80" FontWeight="Bold"
+                           Text="{Binding GenerateRandomVM.RandomNumber}"/>
             <TextBlock Grid.Row = "1" TextAlignment="Center" Margin="10" FontSize="24">https:\\youtube.com</TextBlock>
             <TextBlock Grid.Row="2" TextAlignment="Center" FontSize="16" Margin="10">Name of video</TextBlock>
         </Grid>
         <Grid x:Name="ControlPanel" MinHeight="120" RowDefinitions="Auto, Auto" ColumnDefinitions="14*, 14*, Auto" Grid.Row="1" Margin="0 0 0 10">
-            <Button Grid.Row="0" Grid.Column="0" x:Name="Reset" Margin="10 0 10 0" FontSize="20">Reset List</Button> 
+            <Button Grid.Row="0" Grid.Column="0" x:Name="Reset" Margin="10 0 10 0" FontSize="20" Command="{Binding OpenDialogCommand}">Reset List</Button> 
             <Button Grid.Row="0" Grid.Column="1" x:Name="Roll"  HorizontalAlignment="Center" FontSize="20" HorizontalContentAlignment="Center" MinWidth="140"
-                    Command="{Binding CompositeCommand}"
+                    Command="{Binding GenerateRandomNumberCommand}"
                     IsEnabled="{Binding GenerateRandomVM.IsRollButtonEnabled}">Roll Video</Button> 
             <Button Grid.Row="1" Grid.Column="1" x:Name="Reroll" FontSize="20" HorizontalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="140"
                     Command = "{Binding GenerateRandomVM.RerollRandomNumberCommand}"
@@ -48,4 +53,6 @@
             </Border>
         </Grid>
     </Grid>
+        
+    </dialogHostAvalonia:DialogHost>
 </Window>

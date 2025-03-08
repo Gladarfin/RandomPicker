@@ -21,12 +21,25 @@ public class YoutubeServiceViewModel : ReactiveObject
     {
         FetchVideosCommand = ReactiveCommand.CreateFromTask(FetchVideoAsync);
         var pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Urls.json"));
-        _urls = JsonSerializer.Deserialize<UrlsModel>(File.ReadAllText(pathToFile));
-        _playlists = _urls.Playlists;
+        if (!File.Exists(pathToFile))
+        {
+            //Add dialog-box here
+            
+            return;
+        }
+        DeserializeUrls(pathToFile);
+        //preload videos from playlists
+        Task.Run(FetchVideoAsync);
         MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message => _randomNumber = message.RandomNumber);
     }
     
     public ReactiveCommand<Unit, Unit> FetchVideosCommand { get; }
+
+    private void DeserializeUrls(string pathToFile)
+    {
+        _urls = JsonSerializer.Deserialize<UrlsModel>(File.ReadAllText(pathToFile))!;
+        _playlists = _urls.Playlists;
+    }
 
     private async Task FetchVideoAsync()
     {

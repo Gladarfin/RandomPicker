@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using DialogHostAvalonia;
 using ReactiveUI;
 
@@ -17,9 +18,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _withoutRepetition;
     private string _pathToFile = "Path not set";
     private bool _isExiting;
-    private Control _dialogBox;
-    
-    //public
+
+   //public
     public bool OpenFileAfterExit
     {
         get => _openFileAfterExit;
@@ -41,16 +41,6 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WithoutRepetition));
         }
     }
-
-    public Control DialogBox
-    {
-        get => _dialogBox;
-        set
-        {
-            _dialogBox = value;
-            OnPropertyChanged(nameof(DialogBox));
-        }
-    }
     public double DropDownHeight => 150;
 
     //Commands
@@ -61,13 +51,15 @@ public partial class MainWindowViewModel : ViewModelBase
     //ViewModels
     public GenerateRandomViewModel GenerateRandomVM { get; }
     public YoutubeServiceViewModel YoutubeServiceVM { get; }
+    public DialogBoxViewModel DialogBoxVM { get; }
 
     public MainWindowViewModel()
     {
         GenerateRandomVM = new GenerateRandomViewModel();
         YoutubeServiceVM = new YoutubeServiceViewModel();
+        DialogBoxVM = new DialogBoxViewModel();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
-        OpenDialogCommand = ReactiveCommand.Create(ExecuteOpenDialogWithViewAsync);
+        OpenDialogCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogBoxCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
         GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
     }
 
@@ -90,11 +82,12 @@ public partial class MainWindowViewModel : ViewModelBase
         GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
     }
 
-    private async Task ExecuteOpenDialogWithViewAsync()
+    public async Task ExecuteOpenDialogBoxCommandAsync()
     {
-        Application.Current.TryFindResource("DialogBoxResource", App.Current.ActualThemeVariant, out object dlgBox);
-        DialogBox = dlgBox as Control;
-        await DialogHost.Show(_dialogBox, "MainDialogHost");
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            DialogHost.Show(DialogBoxVM, "MainDialogHost");
+        }); 
     }
     
     public bool IsExiting() => _isExiting;

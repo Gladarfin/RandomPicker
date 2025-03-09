@@ -18,8 +18,10 @@
      <dialogHostAvalonia:DialogHost Identifier="MainDialogHost"
                                 DialogMargin="16"
                                 dialogHostAvalonia:DialogHostStyle.CornerRadius="8">
-        <Grid x:Name="MainGrid" RowDefinitions="2*,Auto,*">
-            <ContentControl Content="{Binding DialogBox}"></ContentControl>
+         <dialogHostAvalonia:DialogHost.DialogContent>
+             <vm:DialogBoxViewModel />
+         </dialogHostAvalonia:DialogHost.DialogContent>
+         <Grid x:Name="MainGrid" RowDefinitions="2*,Auto,*">
             <Grid x:Name="Information" RowDefinitions="2*, Auto, Auto"
                   Grid.Row = "0" Margin="0 10">
                 <TextBlock TextAlignment="Center" Margin="0 20 0 0" FontSize="80" FontWeight="Bold"
@@ -28,7 +30,7 @@
             <TextBlock Grid.Row="2" TextAlignment="Center" FontSize="16" Margin="10">Name of video</TextBlock>
         </Grid>
         <Grid x:Name="ControlPanel" MinHeight="120" RowDefinitions="Auto, Auto" ColumnDefinitions="14*, 14*, Auto" Grid.Row="1" Margin="0 0 0 10">
-            <Button Grid.Row="0" Grid.Column="0" x:Name="Reset" Margin="10 0 10 0" FontSize="20" Command="{Binding OpenDialogCommand}">Reset List</Button> 
+            <Button Grid.Row="0" Grid.Column="0" x:Name="Reset" Margin="10 0 10 0" FontSize="20" Command="{Binding ExecuteOpenDialogBoxCommandAsync}">Reset List</Button> 
             <Button Grid.Row="0" Grid.Column="1" x:Name="Roll"  HorizontalAlignment="Center" FontSize="20" HorizontalContentAlignment="Center" MinWidth="140"
                     Command="{Binding GenerateRandomNumberCommand}"
                     IsEnabled="{Binding GenerateRandomVM.IsRollButtonEnabled}">Roll Video</Button> 

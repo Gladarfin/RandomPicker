@@ -3,24 +3,20 @@
              x:Class="RandomPicker.App.App"
              xmlns:local="using:RandomPicker.App"
              xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+             xmlns:vm="clr-namespace:RandomPicker.App.ViewModels"
+             xmlns:views="clr-namespace:RandomPicker.App.Views"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
+        <DataTemplate DataType="vm:DialogBoxViewModel">
+            <views:DialogBoxView />
+        </DataTemplate>
     </Application.DataTemplates>
   
     <Application.Styles>
         <FluentTheme />
         <dialogHostAvalonia:DialogHostStyles />
     </Application.Styles>
-             <Application.Resources>
-                 <StackPanel x:Key="DialogBoxResource">
-                     <ProgressBar Classes="Circle" IsIndeterminate="True" />
-                     <Button Margin="0 16 0 0"
-                             Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHostAvalonia:DialogHost}, Path=CloseDialogCommand}">
-                         CLOSE
-                     </Button>
-                 </StackPanel>
-             </Application.Resources>
 </Application>

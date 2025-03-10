@@ -43,7 +43,6 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsRollButtonEnabled));
         }
     }
-
     public bool IsRerollButtonEnabled
     {
         get => _isRerollButtonEnabled;

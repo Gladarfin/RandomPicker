@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Text.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
@@ -15,10 +14,17 @@ namespace RandomPicker.App.Services;
 public class YoutubeApiService
 {
     private static Settings _appSettings = new();
+    private readonly List<string> _videos = [];
+    private string _videoUrl = string.Empty;
+    private Bitmap _thumbnail;
 
     public YoutubeApiService()
     {
         var pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+        if (!File.Exists(pathToFile))
+        {
+            throw new FileNotFoundException("Settings file not found", pathToFile);
+        }
         _appSettings = LoadSettings.Load(pathToFile);
     }
     
@@ -29,9 +35,7 @@ public class YoutubeApiService
             ApiKey = _appSettings.ApiKey,
             ApplicationName = _appSettings.ApplicationName
         });
-
-        var videos = new List<string>();
-
+        
         foreach (var list in playlists)
         {
             var playlistItemRequest = youtubeService.PlaylistItems.List("snippet");
@@ -42,13 +46,14 @@ public class YoutubeApiService
             do
             {
                 response = await playlistItemRequest.ExecuteAsync();
-
-                videos.AddRange(response.Items.Select(item => item.Snippet.ResourceId.VideoId));
-
+                _videos.AddRange(response.Items.Select(item => item.Snippet.ResourceId.VideoId));
                 playlistItemRequest.PageToken = response.NextPageToken;
             } while (!string.IsNullOrEmpty(response.NextPageToken));
         }
-
-        return videos;
+        return _videos;
     }
+
+  
+
+    
 }

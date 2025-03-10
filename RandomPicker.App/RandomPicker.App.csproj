@@ -28,4 +28,8 @@
         <PackageReference Include="Google.Apis" Version="1.69.0" />
         <PackageReference Include="Google.Apis.YouTube.v3" Version="1.69.0.3707" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Img\" />
+    </ItemGroup>
 </Project>

@@ -59,7 +59,7 @@ public partial class MainWindowViewModel : ViewModelBase
         YoutubeServiceVM = new YoutubeServiceViewModel();
         DialogBoxVM = new DialogBoxViewModel();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
-        OpenDialogCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogBoxCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
+        
         GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
     }
 
@@ -80,14 +80,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ExecuteGenerateRandomNumberCommand()
     {
         GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
-    }
-
-    public async Task ExecuteOpenDialogBoxCommandAsync()
-    {
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            DialogHost.Show(DialogBoxVM, "MainDialogHost");
-        }); 
     }
     
     public bool IsExiting() => _isExiting;

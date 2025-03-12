@@ -116,10 +116,6 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         //if preview is unavailable (video is private, probably) or there is another exception when we try to get thumbnail 
         //we just should reroll number and try to reload
         //TODO: add private video to CompletedVideos (?)
-        catch (HttpRequestException)
-        {
-            MessageBus.Current.SendMessage(new ThumbnailLoadFailed());
-        }
         catch (Exception)
         {
             MessageBus.Current.SendMessage(new ThumbnailLoadFailed());

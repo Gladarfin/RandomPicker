@@ -21,7 +21,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     //private
     private UrlsModel _urls;
     private List<string> _playlists;
-    private List<string> _videos;
+    private List<string> _videos = [];
     private int _randomNumber = 0;
     private string _videoUrl;
     private Bitmap _thumbnail;   
@@ -107,33 +107,26 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     {
         try
         {
-            using var httpClient = new System.Net.Http.HttpClient();
+            using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(thumbnailUrl);
             response.EnsureSuccessStatusCode();
             var stream = await response.Content.ReadAsStreamAsync();
             Thumbnail = new Bitmap(stream);
         }
-        //if preview is unavailable then video is private 
-        //Change to reroll number
-        catch (HttpRequestException ex)
+        //if preview is unavailable (video is private, probably) or there is another exception when we try to get thumbnail 
+        //we just should reroll number and try to reload
+        //TODO: add private video to CompletedVideos (?)
+        catch (HttpRequestException)
         {
-            LoadDefaultThumbnail();
+            MessageBus.Current.SendMessage(new ThumbnailLoadFailed());
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            LoadDefaultThumbnail();
+            MessageBus.Current.SendMessage(new ThumbnailLoadFailed());
         }
         
     }
-
-    private void LoadDefaultThumbnail()
-    {
-        var defaultPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Img\default_image.png"));
-        Thumbnail = new Bitmap(defaultPath);
-    }
-    
     public event PropertyChangedEventHandler? PropertyChanged;
-
     protected virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

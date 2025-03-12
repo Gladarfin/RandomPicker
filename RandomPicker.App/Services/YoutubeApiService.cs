@@ -13,27 +13,28 @@ namespace RandomPicker.App.Services;
 
 public class YoutubeApiService
 {
-    private static Settings _appSettings = new();
     private readonly List<string> _videos = [];
     private string _videoUrl = string.Empty;
     private Bitmap _thumbnail;
+    private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+    private static Settings AppSettings { get; set; }
 
     public YoutubeApiService()
     {
-        var pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
-        if (!File.Exists(pathToFile))
+        //Don't like that I'm using SettingsService in each ViewModel where I need it
+        Task.Run(async () =>
         {
-            throw new FileNotFoundException("Settings file not found", pathToFile);
-        }
-        _appSettings = LoadSettings.Load(pathToFile);
+            var settingsService = new SettingsService(_pathToFile);
+            AppSettings = await settingsService.LoadSettingsAsync();
+        }).Wait();
     }
     
     public async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)
     {
         var youtubeService = new YouTubeService(new BaseClientService.Initializer()
         {
-            ApiKey = _appSettings.ApiKey,
-            ApplicationName = _appSettings.ApplicationName
+            ApiKey = AppSettings.ApiKey,
+            ApplicationName = AppSettings.ApplicationName
         });
         
         foreach (var list in playlists)

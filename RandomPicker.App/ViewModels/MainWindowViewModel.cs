@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.ReactiveUI;
-using Avalonia.Threading;
-using DialogHostAvalonia;
+using RandomPicker.App.Models;
+using RandomPicker.App.Services;
 using ReactiveUI;
 
 
@@ -16,8 +17,9 @@ public partial class MainWindowViewModel : ViewModelBase
     //private
     private bool _openFileAfterExit;
     private bool _withoutRepetition;
-    private string _pathToFile = "Path not set";
     private bool _isExiting;
+    private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+    private bool _settingIsChanged = false;
 
    //public
     public bool OpenFileAfterExit
@@ -29,6 +31,7 @@ public partial class MainWindowViewModel : ViewModelBase
             
             _openFileAfterExit = value;
             OnPropertyChanged(nameof(OpenFileAfterExit));
+            _settingIsChanged = true;
         }
     }
     public bool WithoutRepetition
@@ -39,49 +42,13 @@ public partial class MainWindowViewModel : ViewModelBase
             if (_withoutRepetition == value) return;
             _withoutRepetition = value;
             OnPropertyChanged(nameof(WithoutRepetition));
+            _settingIsChanged = true;
         }
     }
+    
     public double DropDownHeight => 150;
-
-    //Commands
-    public ICommand ExitCommand { get; }
-    public ICommand GenerateRandomNumberCommand { get; }
-    public ICommand OpenDialogCommand { get; }
-    
-    //ViewModels
-    public GenerateRandomViewModel GenerateRandomVM { get; }
-    public YoutubeServiceViewModel YoutubeServiceVM { get; }
-    public DialogBoxViewModel DialogBoxVM { get; }
-
-    public MainWindowViewModel()
-    {
-        GenerateRandomVM = new GenerateRandomViewModel();
-        YoutubeServiceVM = new YoutubeServiceViewModel();
-        DialogBoxVM = new DialogBoxViewModel();
-        ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
+    public static Settings AppSettings { get; private set; }
         
-        GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
-    }
-
-    private void ExecuteExitApplicationCommand()
-    {
-        if (_isExiting) return;
-        _isExiting = true;
-        
-        if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            //Some logic before close the app, like save settings if changed etc
-            desktop.Shutdown();
-        }
-
-        _isExiting = false;
-    }
-
-    private void ExecuteGenerateRandomNumberCommand()
-    {
-        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
-    }
-    
     public bool IsExiting() => _isExiting;
     
     public string PathToFile
@@ -93,6 +60,65 @@ public partial class MainWindowViewModel : ViewModelBase
             _pathToFile = value;
             OnPropertyChanged(nameof(PathToFile));
         }
+    }
+
+    //Commands
+    public ICommand ExitCommand { get; }
+    public ICommand GenerateRandomNumberCommand { get; }
+    
+    //ViewModels
+    public GenerateRandomViewModel GenerateRandomVM { get; }
+    public YoutubeServiceViewModel YoutubeServiceVM { get; }
+    public DialogBoxViewModel DialogBoxVM { get; }
+    
+    public MainWindowViewModel()
+    {   //Don't like that I'm using SettingsService in each ViewModel where I need it
+        //TODO: try to find solution: load in App maybe?
+        Task.Run(async () =>
+        {
+            var settingsService = new SettingsService(PathToFile);
+            AppSettings = await settingsService.LoadSettingsAsync();
+        }).Wait();
+        
+        _openFileAfterExit = AppSettings.OpenFileAfterExit;
+        _withoutRepetition = AppSettings.RandomWithoutRepetitions;
+        GenerateRandomVM = new GenerateRandomViewModel();
+        YoutubeServiceVM = new YoutubeServiceViewModel();
+        DialogBoxVM = new DialogBoxViewModel();
+        ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
+        GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
+    }
+
+    private void ExecuteExitApplicationCommand()
+    {
+        if (_isExiting) return;
+        _isExiting = true;
+        
+         if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+         {
+            //Some logic before close the app, like save settings if changed etc
+            if (_settingIsChanged)
+            {
+                ChangeSettings();
+                Task.Run(async () => {
+                    var settingsService = new SettingsService(PathToFile);
+                    await settingsService.SaveSettingsAsync(AppSettings);
+                }).Wait();
+            }
+            desktop.Shutdown();
+        }
+        _isExiting = false;
+    }
+
+    private void ChangeSettings()
+    {
+        AppSettings.OpenFileAfterExit = _openFileAfterExit;
+        AppSettings.RandomWithoutRepetitions = _withoutRepetition;
+    }
+
+    private void ExecuteGenerateRandomNumberCommand()
+    {
+        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
     }
     
     public event PropertyChangedEventHandler? PropertyChanged;

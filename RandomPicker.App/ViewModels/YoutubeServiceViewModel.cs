@@ -19,7 +19,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     private const string _videoPrefix = "https://www.youtube.com/watch?v=";
     private const string _prefixThumbnail = "https://img.youtube.com/vi";
     //private
-    private UrlsModel _urls;
+    private ListOfUrls _listOfUrls;
     private List<string> _playlists;
     private List<string> _videos = [];
     private int _randomNumber = 0;
@@ -71,8 +71,8 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     
     private void DeserializeUrls(string pathToFile)
     {
-        _urls = JsonSerializer.Deserialize<UrlsModel>(File.ReadAllText(pathToFile))!;
-        _playlists = _urls.Playlists;
+        _listOfUrls = JsonSerializer.Deserialize<ListOfUrls>(File.ReadAllText(pathToFile))!;
+        _playlists = _listOfUrls.Playlists;
     }
 
     private async Task FetchVideoAsync()
@@ -85,6 +85,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     private void UpdateCurrentVideo()
     {
         VideoUrl = string.Concat(_videoPrefix, _videos[_randomNumber - 1]);
+        MessageBus.Current.SendMessage(new VideoUrl(VideoUrl));
     }
     
     /// <summary></summary>

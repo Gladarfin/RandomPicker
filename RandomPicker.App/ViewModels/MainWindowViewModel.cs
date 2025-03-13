@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using RandomPicker.App.Models;
 using RandomPicker.App.Services;
 using ReactiveUI;
+using Tmds.DBus.Protocol;
 
 
 namespace RandomPicker.App.ViewModels;
@@ -20,6 +23,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isExiting;
     private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
     private bool _settingIsChanged = false;
+    private bool _tooltipIsOpen = false;
+    private string _clipboardText;
 
    //public
     public bool OpenFileAfterExit
@@ -28,7 +33,6 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             if (_openFileAfterExit == value) return;
-            
             _openFileAfterExit = value;
             OnPropertyChanged(nameof(OpenFileAfterExit));
             _settingIsChanged = true;
@@ -45,12 +49,6 @@ public partial class MainWindowViewModel : ViewModelBase
             _settingIsChanged = true;
         }
     }
-    
-    public double DropDownHeight => 150;
-    public static Settings AppSettings { get; private set; }
-        
-    public bool IsExiting() => _isExiting;
-    
     public string PathToFile
     {
         get => _pathToFile;
@@ -61,10 +59,22 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(PathToFile));
         }
     }
+    public bool TooltipIsOpen
+    {
+        get => _tooltipIsOpen;
+        set{
+            _tooltipIsOpen = value;
+            OnPropertyChanged(nameof(TooltipIsOpen));
+        }
+    }
+    public double DropDownHeight => 150;
+    public static Settings AppSettings { get; private set; }
+    public bool IsExiting() => _isExiting;
 
     //Commands
     public ICommand ExitCommand { get; }
     public ICommand GenerateRandomNumberCommand { get; }
+    public ICommand TextBlockClickCommand { get; }
     
     //ViewModels
     public GenerateRandomViewModel GenerateRandomVM { get; }
@@ -87,6 +97,12 @@ public partial class MainWindowViewModel : ViewModelBase
         DialogBoxVM = new DialogBoxViewModel();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
         GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
+        TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
+
+        MessageBus.Current.Listen<VideoUrl>().Subscribe(message =>
+        {
+            _clipboardText = message.Url;
+        });
     }
 
     private void ExecuteExitApplicationCommand()
@@ -108,6 +124,13 @@ public partial class MainWindowViewModel : ViewModelBase
             desktop.Shutdown();
         }
         _isExiting = false;
+    }
+
+    private void ExecuteTextBlockClickCommand()
+    {
+        //copy to clipboard
+        var clipboard = ClipboardService.Get();
+        Task.Run(async() => await clipboard.SetTextAsync(_clipboardText));
     }
 
     private void ChangeSettings()

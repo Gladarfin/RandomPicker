@@ -2,7 +2,7 @@
 
 namespace RandomPicker.App.Models;
 
-public class UrlsModel
+public class ListOfUrls
 {
     public List<string> Playlists { get; set; }
 }

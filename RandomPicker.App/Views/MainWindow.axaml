@@ -30,7 +30,10 @@
                  <TextBlock x:Name="LinkTB" Grid.Row="1" TextAlignment="Center" Margin="10" FontSize="12" Text="{Binding YoutubeServiceVM.VideoUrl}"
                     services:TextBlockCommandBehavior.Command="{Binding TextBlockClickCommand}">
                      <ToolTip.Tip>
-                         <ToolTip Content="Click to copy Link"/>
+                         <StackPanel Orientation="Horizontal" Spacing="5">
+                             <TextBlock FontFamily="{DynamicResource FontAwesomeSolid}" Text="&#xf0c1;" />
+                             <TextBlock Text="Click to copy Link" />
+                         </StackPanel>
                      </ToolTip.Tip>
                  </TextBlock>
                 <TextBlock Grid.Row="2" TextAlignment="Center" Margin="0 20 0 0" FontSize="32" FontWeight="Bold" Text="{Binding GenerateRandomVM.RandomNumber}"/>

@@ -21,5 +21,6 @@
     </Application.Styles>
     <Application.Resources>
           <FontFamily x:Key="FontAwesome">avares://RandomPicker.App/Assets/Font Awesome 6 Free-Regular-400.otf#Font Awesome</FontFamily>       
+        <FontFamily x:Key="FontAwesomeSolid">avares://RandomPicker.App/Assets/Font Awesome 6 Free-Solid-900.otf#Font Awesome 6 Free Solid</FontFamily>     
     </Application.Resources>
 </Application>

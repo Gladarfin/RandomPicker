@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.ReactiveUI;
 using Avalonia.Threading;
@@ -9,11 +10,49 @@ namespace RandomPicker.App.ViewModels;
 
 public class DialogBoxViewModel : ViewModelBase
 {
+    //private
+    private const int AutoCloseDelay = 1500;
+    private bool _buttonVisibility = false;
+    private string _popupText;
+    private string _popupIcon;
+    
+    //public
+    public bool ButtonVisibility
+    {
+        get => _buttonVisibility;
+        set
+        {
+            _buttonVisibility = value;
+            OnPropertyChanged(nameof(ButtonVisibility));
+        }
+    }
+    public string PopupText
+    {
+        get => _popupText;
+        set
+        {
+            _popupText = value;
+            OnPropertyChanged(nameof(PopupText));
+        }
+    }
+    public string PopupIcon
+    {
+        get => _popupIcon;
+        set
+        {
+            _popupIcon = value;
+            OnPropertyChanged(nameof(PopupIcon));
+        }
+    }
+    
+    //commands
     public ICommand OpenDialogCommand { get; }
+    public ICommand OpenDialogWithAutoCloseCommand { get; }
     
     public DialogBoxViewModel()
     {
         OpenDialogCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogBoxCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
+        OpenDialogWithAutoCloseCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogWithAutoCloseCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
     }
     
     public ICommand CloseDialogBoxCommand { get; } = ReactiveCommand.Create(() =>
@@ -24,9 +63,33 @@ public class DialogBoxViewModel : ViewModelBase
     
     public async Task ExecuteOpenDialogBoxCommandAsync()
     {
+        ButtonVisibility = true;
+        PopupText = "This is open dialog box";
+        PopupIcon = string.Empty;
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             DialogHost.Show(this, "MainDialogHost");
-        }); 
+        });
+    }
+
+    public async Task ExecuteOpenDialogWithAutoCloseCommandAsync()
+    {
+        ButtonVisibility = false;
+        PopupIcon = "\uf058";
+        PopupText = "Link was copied!";
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            DialogHost.Show(this, "MainDialogHost");
+        });
+        await Task.Delay(AutoCloseDelay);
+        CloseDialogBoxCommand.Execute(null);
+        PopupText = "";
+    }
+    
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

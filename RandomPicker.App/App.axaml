@@ -19,4 +19,7 @@
         <FluentTheme />
         <dialogHostAvalonia:DialogHostStyles />
     </Application.Styles>
+    <Application.Resources>
+          <FontFamily x:Key="FontAwesome">avares://RandomPicker.App/Assets/Font Awesome 6 Free-Regular-400.otf#Font Awesome</FontFamily>       
+    </Application.Resources>
 </Application>

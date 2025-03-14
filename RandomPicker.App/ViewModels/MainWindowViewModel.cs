@@ -23,8 +23,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isExiting;
     private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
     private bool _settingIsChanged = false;
-    private bool _tooltipIsOpen = false;
     private string _clipboardText;
+    private bool _tooltipIsVisible = false;
 
    //public
     public bool OpenFileAfterExit
@@ -59,12 +59,15 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(PathToFile));
         }
     }
-    public bool TooltipIsOpen
+
+    public bool TooltipIsVisible
     {
-        get => _tooltipIsOpen;
-        set{
-            _tooltipIsOpen = value;
-            OnPropertyChanged(nameof(TooltipIsOpen));
+        get => _tooltipIsVisible;
+        set
+        {
+            if (_tooltipIsVisible == value) return;
+            _tooltipIsVisible = value;
+            OnPropertyChanged(nameof(TooltipIsVisible));
         }
     }
     public double DropDownHeight => 150;
@@ -131,6 +134,8 @@ public partial class MainWindowViewModel : ViewModelBase
         //copy to clipboard
         var clipboard = ClipboardService.Get();
         Task.Run(async() => await clipboard.SetTextAsync(_clipboardText));
+        TooltipIsVisible = true;
+        DialogBoxVM.OpenDialogWithAutoCloseCommand.Execute(null);
     }
 
     private void ChangeSettings()

@@ -85,7 +85,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     private void UpdateCurrentVideo()
     {
         VideoUrl = string.Concat(_videoPrefix, _videos[_randomNumber - 1]);
-        MessageBus.Current.SendMessage(new VideoUrl(VideoUrl));
+        MessageBus.Current.SendMessage(new VideoUrlMessage(VideoUrl));
     }
     
     /// <summary></summary>
@@ -119,7 +119,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         //TODO: add private video to CompletedVideos (?)
         catch (Exception)
         {
-            MessageBus.Current.SendMessage(new ThumbnailLoadFailed());
+            MessageBus.Current.SendMessage(new ThumbnailLoadFailedMessage());
         }
         
     }

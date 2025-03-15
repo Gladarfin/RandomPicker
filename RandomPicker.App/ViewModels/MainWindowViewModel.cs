@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Threading;
+using Newtonsoft.Json;
 using RandomPicker.App.Models;
 using RandomPicker.App.Services;
 using ReactiveUI;
@@ -22,9 +24,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _withoutRepetition;
     private bool _isExiting;
     private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+    private string _pathToCompletedList = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\CompletedVideos.json"));
     private bool _settingIsChanged = false;
     private string _clipboardText;
     private bool _tooltipIsVisible = false;
+    private int _currentRandomNumber;
 
    //public
     public bool OpenFileAfterExit
@@ -59,7 +63,6 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(PathToFile));
         }
     }
-
     public bool TooltipIsVisible
     {
         get => _tooltipIsVisible;
@@ -78,6 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public ICommand ExitCommand { get; }
     public ICommand GenerateRandomNumberCommand { get; }
     public ICommand TextBlockClickCommand { get; }
+    public ICommand ResetListCommand { get; }
     
     //ViewModels
     public GenerateRandomViewModel GenerateRandomVM { get; }
@@ -101,13 +105,14 @@ public partial class MainWindowViewModel : ViewModelBase
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
         GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
+        ResetListCommand = ReactiveCommand.CreateFromTask(ExecuteResetListCommandAsync);
 
-        MessageBus.Current.Listen<VideoUrl>().Subscribe(message =>
+        MessageBus.Current.Listen<VideoUrlMessage>().Subscribe(message =>
         {
             _clipboardText = message.Url;
         });
+        MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message => _currentRandomNumber = message.RandomNumber);
     }
-
     private void ExecuteExitApplicationCommand()
     {
         if (_isExiting) return;
@@ -115,7 +120,6 @@ public partial class MainWindowViewModel : ViewModelBase
         
          if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
-            //Some logic before close the app, like save settings if changed etc
             if (_settingIsChanged)
             {
                 ChangeSettings();
@@ -124,11 +128,11 @@ public partial class MainWindowViewModel : ViewModelBase
                     await settingsService.SaveSettingsAsync(AppSettings);
                 }).Wait();
             }
+            UpdateCompletedVideosList();
             desktop.Shutdown();
-        }
+         }
         _isExiting = false;
     }
-
     private void ExecuteTextBlockClickCommand()
     {
         //copy to clipboard
@@ -137,16 +141,33 @@ public partial class MainWindowViewModel : ViewModelBase
         TooltipIsVisible = true;
         DialogBoxVM.OpenDialogWithAutoCloseCommand.Execute(null);
     }
-
+    private void ExecuteGenerateRandomNumberCommand()
+    {
+        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
+    }
+    private async Task ExecuteResetListCommandAsync()
+    {
+        var newList = JsonConvert.SerializeObject(new CompletedVideos([]), Formatting.Indented); 
+        await File.WriteAllTextAsync(_pathToCompletedList, newList);
+        Debug.WriteLine("List of completed videos was reset");
+    }
     private void ChangeSettings()
     {
         AppSettings.OpenFileAfterExit = _openFileAfterExit;
         AppSettings.RandomWithoutRepetitions = _withoutRepetition;
     }
 
-    private void ExecuteGenerateRandomNumberCommand()
+    private void UpdateCompletedVideosList()
     {
-        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
+        if (!File.Exists(_pathToCompletedList))
+        {
+            Task.Run(async () => await ExecuteResetListCommandAsync()).Wait();
+        }
+
+        var json = JsonConvert.DeserializeObject<CompletedVideos>(File.ReadAllText(_pathToCompletedList));
+        json.CompletedList.Add(_currentRandomNumber);
+        var updatedJson = JsonConvert.SerializeObject(json, Formatting.Indented);
+        Task.Run(async() => await File.WriteAllTextAsync(_pathToCompletedList, updatedJson)).Wait();
     }
     
     public event PropertyChangedEventHandler? PropertyChanged;

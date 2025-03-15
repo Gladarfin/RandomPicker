@@ -6,13 +6,20 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="RandomPicker.App.Views.DialogBoxView">
             <StackPanel>
-                <TextBlock x:DataType="vm:DialogBoxViewModel" TextAlignment="Center" HorizontalAlignment="Center" FontSize="14">
-                    <Run FontFamily="{DynamicResource FontAwesome}" Text="{Binding PopupIcon}" Foreground="Green" FontSize="18"/>
+                <TextBlock x:DataType="vm:DialogBoxViewModel" 
+                           TextAlignment="Center" 
+                           HorizontalAlignment="Center" 
+                           FontSize="14">
+                    <Run FontFamily="{DynamicResource FontAwesome}" 
+                         Text="{Binding PopupIcon}" 
+                         Foreground="Green" 
+                         FontSize="18"/>
                     <Run Text="{Binding PopupText}"/>
                 </TextBlock>
                 <Button Margin="0 16 0 0"
                         x:DataType="vm:DialogBoxViewModel"
-                        Command="{Binding CloseDialogBoxCommand}" IsVisible="{Binding ButtonVisibility}">
+                        Command="{Binding CloseDialogBoxCommand}" 
+                        IsVisible="{Binding ButtonVisibility}">
                     CLOSE
                 </Button>
             </StackPanel>

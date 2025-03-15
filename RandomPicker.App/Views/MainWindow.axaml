@@ -11,7 +11,8 @@
         x:Class="RandomPicker.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="RandomPicker">
+        Title="RandomPicker"
+        CanResize="False">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -23,44 +24,105 @@
          <dialogHostAvalonia:DialogHost.DialogContent>
              <vm:DialogBoxViewModel />
          </dialogHostAvalonia:DialogHost.DialogContent>
-         <Grid x:Name="MainGrid" RowDefinitions="2*,Auto,*">
-            <Grid x:Name="Information" RowDefinitions="2*, Auto, Auto"
-                  Grid.Row = "0" Margin="0 10">
-                <Image Grid.Row="0" Width="320" Height="180" Source="{Binding YoutubeServiceVM.Thumbnail}" Margin="0 0 0 20"/>
-                 <TextBlock x:Name="LinkTB" Grid.Row="1" TextAlignment="Center" Margin="10" FontSize="12" Text="{Binding YoutubeServiceVM.VideoUrl}"
-                    services:TextBlockCommandBehavior.Command="{Binding TextBlockClickCommand}">
+         <Grid x:Name="MainGrid" 
+               RowDefinitions="2*,Auto,*">
+            <Grid x:Name="Information" 
+                  RowDefinitions="2*, Auto, Auto"
+                  Grid.Row = "0" 
+                  Margin="0 10">
+                <Image Grid.Row="0" 
+                       Width="320" 
+                       Height="180" 
+                       Source="{Binding YoutubeServiceVM.Thumbnail}" 
+                       Margin="0 0 0 20"/>
+                 <TextBlock x:Name="LinkTB" 
+                            Grid.Row="1" 
+                            TextAlignment="Center" 
+                            Margin="10" 
+                            FontSize="12" 
+                            Text="{Binding YoutubeServiceVM.VideoUrl}"
+                            services:TextBlockCommandBehavior.Command="{Binding TextBlockClickCommand}">
                      <ToolTip.Tip>
-                         <StackPanel Orientation="Horizontal" Spacing="5">
-                             <TextBlock FontFamily="{DynamicResource FontAwesomeSolid}" Text="&#xf0c1;" />
+                         <StackPanel Orientation="Horizontal" 
+                                     Spacing="5">
+                             <TextBlock FontFamily="{DynamicResource FontAwesomeSolid}" 
+                                        Text="&#xf0c1;" />
                              <TextBlock Text="Click to copy Link" />
                          </StackPanel>
                      </ToolTip.Tip>
                  </TextBlock>
-                <TextBlock Grid.Row="2" TextAlignment="Center" Margin="0 20 0 0" FontSize="32" FontWeight="Bold" Text="{Binding GenerateRandomVM.RandomNumber}"/>
+                <TextBlock Grid.Row="2" 
+                           TextAlignment="Center" 
+                           Margin="0 20 0 0" 
+                           FontSize="32" 
+                           FontWeight="Bold" 
+                           Text="{Binding GenerateRandomVM.RandomNumber}"/>
         
             </Grid>
-        <Grid x:Name="ControlPanel" MinHeight="120" RowDefinitions="Auto, Auto" ColumnDefinitions="14*, 14*, Auto" Grid.Row="1" Margin="0 0 0 10">
-            <Button Grid.Row="0" Grid.Column="0" x:Name="Reset" Margin="10 0 10 0" FontSize="20" Command="{Binding DialogBoxVM.ExecuteOpenDialogBoxCommandAsync}">Reset List</Button> 
-            <Button Grid.Row="0" Grid.Column="1" x:Name="Roll"  HorizontalAlignment="Center" FontSize="20" HorizontalContentAlignment="Center" MinWidth="140"
-                    Command="{Binding GenerateRandomNumberCommand}"
-                    IsEnabled="{Binding GenerateRandomVM.IsRollButtonEnabled}">Roll Video</Button> 
-            <Button Grid.Row="1" Grid.Column="1" x:Name="Reroll" FontSize="20" HorizontalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="140"
-                    Command = "{Binding GenerateRandomVM.RerollRandomNumberCommand}"
-                    IsEnabled="{Binding GenerateRandomVM.IsRerollButtonEnabled}">Reroll Video</Button> 
-            <Button Grid.Row="1" Grid.Column="2" x:Name="Exit" FontSize="20" HorizontalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="120" Margin="10 0 10 0"
-                    Command="{Binding ExitCommand}">Exit</Button>
+        <Grid x:Name="ControlPanel" 
+              MinHeight="120" 
+              RowDefinitions="Auto, Auto" 
+              ColumnDefinitions="14*, 14*, Auto" 
+              Grid.Row="1" 
+              Margin="0 0 0 10">
+            <Button Grid.Row="0" 
+                    Grid.Column="0" 
+                    x:Name="Reset" 
+                    Margin="10 0 10 0" 
+                    FontSize="20" 
+                    Command="{Binding ResetListCommand}">Reset List</Button> 
+            <Button  x:Name="Roll"
+                     Grid.Row="0" 
+                     Grid.Column="1"  
+                     HorizontalAlignment="Center" 
+                     HorizontalContentAlignment="Center"
+                     FontSize="20" 
+                     MinWidth="140"
+                     Command="{Binding GenerateRandomNumberCommand}"
+                     IsEnabled="{Binding GenerateRandomVM.IsRollButtonEnabled}">Roll Video</Button> 
+            <Button  x:Name="Reroll"
+                     Grid.Row="1" 
+                     Grid.Column="1" 
+                     FontSize="20" 
+                     HorizontalAlignment="Center" 
+                     HorizontalContentAlignment="Center" 
+                     MinWidth="140"
+                     Command = "{Binding GenerateRandomVM.RerollRandomNumberCommand}"
+                     IsEnabled="{Binding GenerateRandomVM.IsRerollButtonEnabled}">Reroll Video</Button> 
+            <Button  x:Name="Exit" 
+                     Grid.Row="1" 
+                     Grid.Column="2" 
+                     FontSize="20" 
+                     HorizontalAlignment="Center" 
+                     HorizontalContentAlignment="Center" 
+                     MinWidth="120" 
+                     Margin="10 0 10 0"
+                     Command="{Binding ExitCommand}">Exit</Button>
         </Grid>
+        <!--Settings -->
         <Grid x:Name="Settings" Grid.Row="2">
-            <Border BorderBrush="Gray" BorderThickness="0 1 0 0"
+            <Border BorderBrush="Gray" 
+                    BorderThickness="0 1 0 0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     Height="{Binding DropDownHeight}"
                     ClipToBounds="True">
-                <Grid Margin = "10 0 10 0" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
-                    <Label Content="Settings" FontSize="16"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Open after Exit" IsChecked="{Binding OpenFileAfterExit}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Without Repetitions" IsChecked="{Binding WithoutRepetition}" />
-                    <TextBox Grid.Row="2" Grid.Column = "0" Grid.ColumnSpan="2" Text="{Binding PathToFile}"/>
+                <Grid Margin = "10 0 10 0" 
+                      RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                    <Label Content="Settings" 
+                           FontSize="16"/>
+                    <CheckBox Grid.Row="1" 
+                              Grid.Column="0" 
+                              Content="Open after Exit" 
+                              IsChecked="{Binding OpenFileAfterExit}"/>
+                    <CheckBox Grid.Row="1" 
+                              Grid.Column="1" 
+                              Content="Without Repetitions" 
+                              IsChecked="{Binding WithoutRepetition}" />
+                    <TextBox Grid.Row="2" 
+                             Grid.Column = "0" 
+                             Grid.ColumnSpan="2" 
+                             Text="{Binding PathToFile}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -1,6 +1,6 @@
 ﻿namespace RandomPicker.App.Models;
 
-public class ThumbnailLoadFailed
+public class ThumbnailLoadFailedMessage
 {
     
 }

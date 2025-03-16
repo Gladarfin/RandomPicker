@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RandomPicker.App.Models;
@@ -25,7 +24,6 @@ public class CompletedVideosService(string completedVideosFilePath, int currentR
     {
         var newList = JsonConvert.SerializeObject(new CompletedVideos([]), Formatting.Indented); 
         await File.WriteAllTextAsync(completedVideosFilePath, newList);
-        //Debug.WriteLine("List of completed videos was reset");
     }
     
 }

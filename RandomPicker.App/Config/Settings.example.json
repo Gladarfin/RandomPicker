@@ -1,0 +1,9 @@
+﻿{
+  "OpenFileAfterExit" : true,
+  "RandomWithoutRepetitions" : true,
+  "PathToFileWithUrls" : "D:\\RandomPicker\\Config\\Urls.json",
+  "PathToFileWithCompleted" : "D:\\RandomPicker\\Config\\CompletedVideos.json",
+  "ApiKey" : "YOUR_YOUTUBE_API_KEY",
+  "ApplicationName" : "SimpleRandomizer",
+  "AddPrivateVideosToCompleted" : true
+}

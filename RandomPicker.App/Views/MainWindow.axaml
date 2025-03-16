@@ -6,8 +6,8 @@
         xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
         xmlns:services="clr-namespace:RandomPicker.App.Services"
         xmlns:views="clr-namespace:RandomPicker.App.Views"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
-        Width="400" Height="500"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+        Width="400" Height="450"
         x:Class="RandomPicker.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/lotus.ico"
@@ -25,15 +25,15 @@
              <vm:DialogBoxViewModel />
          </dialogHostAvalonia:DialogHost.DialogContent>
          <Grid x:Name="MainGrid" 
-               RowDefinitions="2*,Auto">
+               RowDefinitions="1.5*,Auto">
              <!--Information-->
              <Grid x:Name="Information" 
                    RowDefinitions="2*, Auto, Auto"
                    Grid.Row = "0" 
                    Margin="0 10">
                 <Image Grid.Row="0" 
-                       Width="320" 
-                       Height="180" 
+                       Width="380" 
+                       Height="240" 
                        Source="{Binding YoutubeServiceVM.Thumbnail}" 
                        Margin="0 20 0 20"/>
                  <TextBlock x:Name="LinkTB" 
@@ -54,7 +54,7 @@
                  </TextBlock>
                 <TextBlock Grid.Row="2" 
                            TextAlignment="Center" 
-                           Margin="0 20 0 0" 
+                           Margin="0 10 0 20" 
                            FontSize="32" 
                            FontWeight="Bold" 
                            Text="{Binding GenerateRandomVM.RandomNumber}"/>

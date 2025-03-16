@@ -16,11 +16,4 @@ public class SettingsService(string settingsFilePath)
         var json = await File.ReadAllTextAsync(settingsFilePath);
         return JsonConvert.DeserializeObject<Settings>(json) ?? new Settings();
     }
-
-    public async Task SaveSettingsAsync(Settings settings)
-    {
-        var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-        await File.WriteAllTextAsync(settingsFilePath, json);
-    }
-    
 }

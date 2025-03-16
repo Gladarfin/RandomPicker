@@ -20,21 +20,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private int _currentRandomNumber;
     private bool _settingIsChanged = false;
     private string _clipboardText;
-    private bool _tooltipIsVisible = false;
     private static CompletedVideosService _completedVideosService;
 
    //public
-    public bool TooltipIsVisible
-    {
-        get => _tooltipIsVisible;
-        set
-        {
-            if (_tooltipIsVisible == value) return;
-            _tooltipIsVisible = value;
-            OnPropertyChanged(nameof(TooltipIsVisible));
-        }
-    }
-
     public static Settings AppSettings { get; private set; }
     public bool IsExiting() => _isExiting;
 
@@ -102,7 +90,6 @@ public partial class MainWindowViewModel : ViewModelBase
         //copy to clipboard
         var clipboard = ClipboardService.Get();
         Task.Run(async() => await clipboard.SetTextAsync(_clipboardText));
-        TooltipIsVisible = true;
         DialogBoxVM.OpenDialogWithAutoCloseCommand.Execute(null);
     }
     

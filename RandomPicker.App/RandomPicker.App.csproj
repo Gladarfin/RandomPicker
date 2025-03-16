@@ -29,4 +29,16 @@
         <PackageReference Include="Google.Apis.YouTube.v3" Version="1.69.0.3707" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Config\Settings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Config\Urls.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Config\CompletedVideos.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

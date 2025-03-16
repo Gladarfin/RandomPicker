@@ -10,7 +10,7 @@
         Width="400" Height="500"
         x:Class="RandomPicker.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/lotus.ico"
         Title="RandomPicker"
         CanResize="False">
     <Design.DataContext>
@@ -25,16 +25,17 @@
              <vm:DialogBoxViewModel />
          </dialogHostAvalonia:DialogHost.DialogContent>
          <Grid x:Name="MainGrid" 
-               RowDefinitions="2*,Auto,*">
-            <Grid x:Name="Information" 
-                  RowDefinitions="2*, Auto, Auto"
-                  Grid.Row = "0" 
-                  Margin="0 10">
+               RowDefinitions="2*,Auto">
+             <!--Information-->
+             <Grid x:Name="Information" 
+                   RowDefinitions="2*, Auto, Auto"
+                   Grid.Row = "0" 
+                   Margin="0 10">
                 <Image Grid.Row="0" 
                        Width="320" 
                        Height="180" 
                        Source="{Binding YoutubeServiceVM.Thumbnail}" 
-                       Margin="0 0 0 20"/>
+                       Margin="0 20 0 20"/>
                  <TextBlock x:Name="LinkTB" 
                             Grid.Row="1" 
                             TextAlignment="Center" 
@@ -59,6 +60,7 @@
                            Text="{Binding GenerateRandomVM.RandomNumber}"/>
         
             </Grid>
+        <!--Control Panel-->
         <Grid x:Name="ControlPanel" 
               MinHeight="120" 
               RowDefinitions="Auto, Auto" 
@@ -70,7 +72,7 @@
                     x:Name="Reset" 
                     Margin="10 0 10 0" 
                     FontSize="20" 
-                    Command="{Binding ResetListCommand}">Reset List</Button> 
+                    Command="{Binding ResetCompletedVideosListAsyncCommand}">Reset List</Button> 
             <Button  x:Name="Roll"
                      Grid.Row="0" 
                      Grid.Column="1"  
@@ -78,7 +80,7 @@
                      HorizontalContentAlignment="Center"
                      FontSize="20" 
                      MinWidth="140"
-                     Command="{Binding GenerateRandomNumberCommand}"
+                     Command="{Binding GenerateRandomVM.GenerateRandomNumberCommand}"
                      IsEnabled="{Binding GenerateRandomVM.IsRollButtonEnabled}">Roll Video</Button> 
             <Button  x:Name="Reroll"
                      Grid.Row="1" 
@@ -98,33 +100,6 @@
                      MinWidth="120" 
                      Margin="10 0 10 0"
                      Command="{Binding ExitCommand}">Exit</Button>
-        </Grid>
-        <!--Settings -->
-        <Grid x:Name="Settings" Grid.Row="2">
-            <Border BorderBrush="Gray" 
-                    BorderThickness="0 1 0 0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top"
-                    Height="{Binding DropDownHeight}"
-                    ClipToBounds="True">
-                <Grid Margin = "10 0 10 0" 
-                      RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
-                    <Label Content="Settings" 
-                           FontSize="16"/>
-                    <CheckBox Grid.Row="1" 
-                              Grid.Column="0" 
-                              Content="Open after Exit" 
-                              IsChecked="{Binding OpenFileAfterExit}"/>
-                    <CheckBox Grid.Row="1" 
-                              Grid.Column="1" 
-                              Content="Without Repetitions" 
-                              IsChecked="{Binding WithoutRepetition}" />
-                    <TextBox Grid.Row="2" 
-                             Grid.Column = "0" 
-                             Grid.ColumnSpan="2" 
-                             Text="{Binding PathToFile}"/>
-                </Grid>
-            </Border>
         </Grid>
     </Grid>
         

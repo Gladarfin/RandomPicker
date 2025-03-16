@@ -1,68 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Newtonsoft.Json;
 using RandomPicker.App.Models;
 using RandomPicker.App.Services;
 using ReactiveUI;
-using Tmds.DBus.Protocol;
-
 
 namespace RandomPicker.App.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     //private
-    private bool _openFileAfterExit;
-    private bool _withoutRepetition;
     private bool _isExiting;
-    private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
-    private string _pathToCompletedList = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\CompletedVideos.json"));
+    private readonly string _pathToSettingsFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+    private string _pathToCompletedList;
+    private int _currentRandomNumber;
     private bool _settingIsChanged = false;
     private string _clipboardText;
     private bool _tooltipIsVisible = false;
-    private int _currentRandomNumber;
+    private static CompletedVideosService _completedVideosService;
 
    //public
-    public bool OpenFileAfterExit
-    {
-        get => _openFileAfterExit;
-        set
-        {
-            if (_openFileAfterExit == value) return;
-            _openFileAfterExit = value;
-            OnPropertyChanged(nameof(OpenFileAfterExit));
-            _settingIsChanged = true;
-        }
-    }
-    public bool WithoutRepetition
-    {
-        get => _withoutRepetition;
-        set
-        {
-            if (_withoutRepetition == value) return;
-            _withoutRepetition = value;
-            OnPropertyChanged(nameof(WithoutRepetition));
-            _settingIsChanged = true;
-        }
-    }
-    public string PathToFile
-    {
-        get => _pathToFile;
-        set
-        {
-            if (_pathToFile == value) return;
-            _pathToFile = value;
-            OnPropertyChanged(nameof(PathToFile));
-        }
-    }
     public bool TooltipIsVisible
     {
         get => _tooltipIsVisible;
@@ -73,15 +34,15 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(TooltipIsVisible));
         }
     }
-    public double DropDownHeight => 150;
+
     public static Settings AppSettings { get; private set; }
     public bool IsExiting() => _isExiting;
 
     //Commands
     public ICommand ExitCommand { get; }
-    public ICommand GenerateRandomNumberCommand { get; }
     public ICommand TextBlockClickCommand { get; }
-    public ICommand ResetListCommand { get; }
+    public ICommand ResetCompletedVideosListAsyncCommand { get; }
+    public ICommand UpdateCompletedVideosCommand { get; }
     
     //ViewModels
     public GenerateRandomViewModel GenerateRandomVM { get; }
@@ -93,26 +54,35 @@ public partial class MainWindowViewModel : ViewModelBase
         //TODO: try to find solution: load in App maybe?
         Task.Run(async () =>
         {
-            var settingsService = new SettingsService(PathToFile);
+            var settingsService = new SettingsService(_pathToSettingsFile);
             AppSettings = await settingsService.LoadSettingsAsync();
         }).Wait();
-        
-        _openFileAfterExit = AppSettings.OpenFileAfterExit;
-        _withoutRepetition = AppSettings.RandomWithoutRepetitions;
+
+        _pathToCompletedList = AppSettings.PathToFileWithCompleted;
         GenerateRandomVM = new GenerateRandomViewModel();
         YoutubeServiceVM = new YoutubeServiceViewModel();
         DialogBoxVM = new DialogBoxViewModel();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
-        GenerateRandomNumberCommand = ReactiveCommand.Create(ExecuteGenerateRandomNumberCommand);
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
-        ResetListCommand = ReactiveCommand.CreateFromTask(ExecuteResetListCommandAsync);
+        UpdateCompletedVideosCommand = ReactiveCommand.Create(() => _completedVideosService.UpdateCompletedVideosList());
+        ResetCompletedVideosListAsyncCommand = ReactiveCommand.CreateFromTask(async() => await _completedVideosService.ResetListAsync());
+        SubscribeToMessages();
 
+    }
+
+    private void SubscribeToMessages()
+    {
         MessageBus.Current.Listen<VideoUrlMessage>().Subscribe(message =>
         {
             _clipboardText = message.Url;
         });
-        MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message => _currentRandomNumber = message.RandomNumber);
+        MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message =>
+        {
+            _currentRandomNumber = message.RandomNumber;
+            UpdateCompletedVideosService();
+        });
     }
+    
     private void ExecuteExitApplicationCommand()
     {
         if (_isExiting) return;
@@ -120,19 +90,13 @@ public partial class MainWindowViewModel : ViewModelBase
         
          if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
-            if (_settingIsChanged)
-            {
-                ChangeSettings();
-                Task.Run(async () => {
-                    var settingsService = new SettingsService(PathToFile);
-                    await settingsService.SaveSettingsAsync(AppSettings);
-                }).Wait();
-            }
-            UpdateCompletedVideosList();
+            if (!GenerateRandomVM.IsRollButtonEnabled)
+                UpdateCompletedVideosCommand.Execute(null);
             desktop.Shutdown();
          }
         _isExiting = false;
     }
+    
     private void ExecuteTextBlockClickCommand()
     {
         //copy to clipboard
@@ -141,33 +105,10 @@ public partial class MainWindowViewModel : ViewModelBase
         TooltipIsVisible = true;
         DialogBoxVM.OpenDialogWithAutoCloseCommand.Execute(null);
     }
-    private void ExecuteGenerateRandomNumberCommand()
+    
+    private void UpdateCompletedVideosService()
     {
-        GenerateRandomVM.GenerateRandomNumberCommand.Execute(null);
-    }
-    private async Task ExecuteResetListCommandAsync()
-    {
-        var newList = JsonConvert.SerializeObject(new CompletedVideos([]), Formatting.Indented); 
-        await File.WriteAllTextAsync(_pathToCompletedList, newList);
-        Debug.WriteLine("List of completed videos was reset");
-    }
-    private void ChangeSettings()
-    {
-        AppSettings.OpenFileAfterExit = _openFileAfterExit;
-        AppSettings.RandomWithoutRepetitions = _withoutRepetition;
-    }
-
-    private void UpdateCompletedVideosList()
-    {
-        if (!File.Exists(_pathToCompletedList))
-        {
-            Task.Run(async () => await ExecuteResetListCommandAsync()).Wait();
-        }
-
-        var json = JsonConvert.DeserializeObject<CompletedVideos>(File.ReadAllText(_pathToCompletedList));
-        json.CompletedList.Add(_currentRandomNumber);
-        var updatedJson = JsonConvert.SerializeObject(json, Formatting.Indented);
-        Task.Run(async() => await File.WriteAllTextAsync(_pathToCompletedList, updatedJson)).Wait();
+        _completedVideosService = new CompletedVideosService(_pathToCompletedList, _currentRandomNumber);
     }
     
     public event PropertyChangedEventHandler? PropertyChanged;

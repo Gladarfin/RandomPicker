@@ -1,8 +1,8 @@
 ﻿{
   "OpenFileAfterExit" : true,
   "RandomWithoutRepetitions" : true,
-  "PathToFileWithUrls" : "SomePath",
-  "PathToFileWithCompleted" : "SomePath",
+  "PathToFileWithUrls" : "D:\\Projects\\RandomPicker\\RandomPicker.App\\Config\\Urls.json",
+  "PathToFileWithCompleted" : "D:\\Projects\\RandomPicker\\RandomPicker.App\\Config\\CompletedVideos.json",
   "ApiKey" : "AIzaSyCjG474O8137QSZiSnubolw1hMO8fOhJmw",
   "ApplicationName" : "SimpleRandomizer"
 }

@@ -63,6 +63,11 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
         IsRerollButtonEnabled = false;
         GenerateRandomNumberCommand = ReactiveCommand.Create(GenerateRandomNumber);
         RerollRandomNumberCommand = ReactiveCommand.Create(RerollRandomNumber);
+        SubscribeToMessages();
+    }
+    
+    private void SubscribeToMessages()
+    {
         MessageBus.Current.Listen<VideoCountMessage>().Subscribe(message => RandomMaxValue = message.Count);
         MessageBus.Current.Listen<ThumbnailLoadFailedMessage>().Subscribe(_ => RerollRandomNumber());
     }

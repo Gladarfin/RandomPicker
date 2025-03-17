@@ -1,8 +1,12 @@
+using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
+using RandomPicker.App.Services;
 using RandomPicker.App.ViewModels;
 using RandomPicker.App.Views;
 
@@ -10,6 +14,8 @@ namespace RandomPicker.App;
 
 public partial class App : Application
 {
+    private readonly string _pathToSettingsFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -17,6 +23,10 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -24,7 +34,7 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = serviceProvider.GetRequiredService<MainWindowViewModel>()
             };
         }
         base.OnFrameworkInitializationCompleted();
@@ -41,5 +51,15 @@ public partial class App : Application
         {
             BindingPlugins.DataValidators.Remove(plugin);
         }
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<SettingsService>(_ => new SettingsService(_pathToSettingsFile));
+        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<YoutubeApiService>();
+        services.AddTransient<YoutubeServiceViewModel>();
+        services.AddTransient<GenerateRandomViewModel>();
+        services.AddTransient<DialogBoxViewModel>();
     }
 }

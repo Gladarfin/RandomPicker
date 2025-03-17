@@ -15,15 +15,13 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     //private
     private bool _isExiting;
-    private readonly string _pathToSettingsFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
     private string _pathToCompletedList;
     private int _currentRandomNumber;
-    private bool _settingIsChanged = false;
     private string _clipboardText;
     private static CompletedVideosService _completedVideosService;
-
+    private static Settings _appSettings;
+    
    //public
-    public static Settings AppSettings { get; private set; }
     public bool IsExiting() => _isExiting;
 
     //Commands
@@ -37,25 +35,25 @@ public partial class MainWindowViewModel : ViewModelBase
     public YoutubeServiceViewModel YoutubeServiceVM { get; }
     public DialogBoxViewModel DialogBoxVM { get; }
     
-    public MainWindowViewModel()
-    {   //Don't like that I'm using SettingsService in each ViewModel where I need it
-        //TODO: try to find solution: load in App maybe?
-        Task.Run(async () =>
-        {
-            var settingsService = new SettingsService(_pathToSettingsFile);
-            AppSettings = await settingsService.LoadSettingsAsync();
+    public MainWindowViewModel(SettingsService settingsService, 
+        YoutubeServiceViewModel youtubeServiceViewModel,
+        DialogBoxViewModel dialogBoxViewModel,
+        GenerateRandomViewModel generateRandomViewModel)
+    {
+        Task.Run(async () => {
+            _appSettings = await settingsService.LoadSettingsAsync();
         }).Wait();
 
-        _pathToCompletedList = AppSettings.PathToFileWithCompleted;
-        GenerateRandomVM = new GenerateRandomViewModel();
-        DialogBoxVM = new DialogBoxViewModel();
-        YoutubeServiceVM = new YoutubeServiceViewModel();
+        _pathToCompletedList = _appSettings.PathToFileWithCompleted;
+        GenerateRandomVM = generateRandomViewModel;
+        DialogBoxVM = dialogBoxViewModel;
+        YoutubeServiceVM = youtubeServiceViewModel;
         SubscribeToMessages();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
         UpdateCompletedVideosCommand = ReactiveCommand.Create(() => _completedVideosService.UpdateCompletedVideosList());
         ResetCompletedVideosListAsyncCommand = ReactiveCommand.CreateFromTask(async() => await _completedVideosService.ResetListAsync());
-        YoutubeServiceVM.CheckAndDeserializeFile(AppSettings.PathToFileWithUrls);
+        YoutubeServiceVM.CheckAndDeserializeUrlsFile(_appSettings.PathToFileWithUrls);
     }
 
     private void SubscribeToMessages()

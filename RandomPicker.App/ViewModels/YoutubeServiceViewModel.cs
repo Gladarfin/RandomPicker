@@ -25,6 +25,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     private int _randomNumber;
     private string _videoUrl;
     private Bitmap _thumbnail;
+    private readonly YoutubeApiService _youtubeApiService;
 
     //public
     public string VideoUrl
@@ -47,12 +48,16 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         }
     }
     
-    public YoutubeServiceViewModel()
+    //commands
+    public ReactiveCommand<Unit, Unit> FetchVideosCommand { get; }
+    
+    public YoutubeServiceViewModel(YoutubeApiService youtubeApiService)
     {
+        _youtubeApiService = youtubeApiService;
         FetchVideosCommand = ReactiveCommand.CreateFromTask(FetchVideoAsync);
     }
 
-    public void CheckAndDeserializeFile(string pathToFile)
+    public void CheckAndDeserializeUrlsFile(string pathToFile)
     {
         if (!File.Exists(pathToFile))
         {
@@ -75,8 +80,6 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         });
     }
     
-    public ReactiveCommand<Unit, Unit> FetchVideosCommand { get; }
-    
     private void DeserializeUrls(string pathToFile)
     {
         _listOfUrls = JsonSerializer.Deserialize<ListOfUrls>(File.ReadAllText(pathToFile))!;
@@ -85,8 +88,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
 
     private async Task FetchVideoAsync()
     {
-        var youtubeService = new YoutubeApiService();
-        _videos = await youtubeService.CreateListOfAllVideosFromPlaylists(_playlists);
+        _videos = await _youtubeApiService.CreateListOfAllVideosFromPlaylists(_playlists);
         MessageBus.Current.SendMessage(new VideoCountMessage(_videos.Count));
     }
     

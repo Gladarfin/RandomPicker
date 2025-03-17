@@ -12,7 +12,7 @@ public class DialogBoxViewModel : ViewModelBase
 {
     //private
     private const int AutoCloseDelay = 1500;
-    private bool _buttonVisibility = false;
+    private bool _buttonVisibility;
     private string _popupText;
     private string _popupIcon;
     

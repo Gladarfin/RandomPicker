@@ -14,18 +14,14 @@ namespace RandomPicker.App.Services;
 public class YoutubeApiService
 {
     private readonly List<string> _videos = [];
-    private string _videoUrl = string.Empty;
     private Bitmap _thumbnail;
-    private string _pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
-    private static Settings AppSettings { get; set; }
+    private static Settings _appSettings;
 
-    public YoutubeApiService()
+    public YoutubeApiService(SettingsService settingsService)
     {
-        //Don't like that I'm using SettingsService in each ViewModel where I need it
         Task.Run(async () =>
         {
-            var settingsService = new SettingsService(_pathToFile);
-            AppSettings = await settingsService.LoadSettingsAsync();
+            _appSettings = await settingsService.LoadSettingsAsync();
         }).Wait();
     }
     
@@ -33,8 +29,8 @@ public class YoutubeApiService
     {
         var youtubeService = new YouTubeService(new BaseClientService.Initializer()
         {
-            ApiKey = AppSettings.ApiKey,
-            ApplicationName = AppSettings.ApplicationName
+            ApiKey = _appSettings.ApiKey,
+            ApplicationName = _appSettings.ApplicationName
         });
         
         foreach (var list in playlists)

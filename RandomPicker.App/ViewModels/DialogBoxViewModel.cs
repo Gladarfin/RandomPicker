@@ -51,7 +51,7 @@ public class DialogBoxViewModel : ViewModelBase
     
     public DialogBoxViewModel()
     {
-        OpenDialogCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogBoxCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
+        OpenDialogCommand = ReactiveCommand.CreateFromTask<string>(ExecuteOpenDialogBoxCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
         OpenDialogWithAutoCloseCommand = ReactiveCommand.CreateFromTask(ExecuteOpenDialogWithAutoCloseCommandAsync, outputScheduler: AvaloniaScheduler.Instance);
     }
     
@@ -61,10 +61,10 @@ public class DialogBoxViewModel : ViewModelBase
         
     }, outputScheduler: AvaloniaScheduler.Instance);
     
-    public async Task ExecuteOpenDialogBoxCommandAsync()
+    public async Task ExecuteOpenDialogBoxCommandAsync(string odText)
     {
         ButtonVisibility = true;
-        PopupText = "This is open dialog box";
+        PopupText = odText;
         PopupIcon = string.Empty;
         await Dispatcher.UIThread.InvokeAsync(() =>
         {

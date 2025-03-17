@@ -9,7 +9,8 @@
                 <TextBlock x:DataType="vm:DialogBoxViewModel" 
                            TextAlignment="Center" 
                            HorizontalAlignment="Center" 
-                           FontSize="14">
+                           FontSize="14"
+                           TextWrapping="Wrap">
                     <Run FontFamily="{DynamicResource FontAwesome}" 
                          Text="{Binding PopupIcon}" 
                          Foreground="Green" 

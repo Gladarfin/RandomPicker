@@ -48,14 +48,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _pathToCompletedList = AppSettings.PathToFileWithCompleted;
         GenerateRandomVM = new GenerateRandomViewModel();
-        YoutubeServiceVM = new YoutubeServiceViewModel();
         DialogBoxVM = new DialogBoxViewModel();
+        YoutubeServiceVM = new YoutubeServiceViewModel();
+        SubscribeToMessages();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
         UpdateCompletedVideosCommand = ReactiveCommand.Create(() => _completedVideosService.UpdateCompletedVideosList());
         ResetCompletedVideosListAsyncCommand = ReactiveCommand.CreateFromTask(async() => await _completedVideosService.ResetListAsync());
-        SubscribeToMessages();
-
+        YoutubeServiceVM.CheckAndDeserializeFile(AppSettings.PathToFileWithUrls);
     }
 
     private void SubscribeToMessages()
@@ -69,6 +69,9 @@ public partial class MainWindowViewModel : ViewModelBase
             _currentRandomNumber = message.RandomNumber;
             UpdateCompletedVideosService();
         });
+        MessageBus.Current.Listen<FileNotFoundMessage>().Subscribe(message => 
+                DialogBoxVM.OpenDialogCommand.Execute($"File doesn't exist:\n {message.PathToFile}")
+                );
     }
     
     private void ExecuteExitApplicationCommand()

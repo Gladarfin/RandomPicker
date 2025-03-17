@@ -22,9 +22,10 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     private ListOfUrls _listOfUrls;
     private List<string> _playlists;
     private List<string> _videos = [];
-    private int _randomNumber = 0;
+    private int _randomNumber;
     private string _videoUrl;
-    private Bitmap _thumbnail;   
+    private Bitmap _thumbnail;
+
     //public
     public string VideoUrl
     {
@@ -49,16 +50,23 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     public YoutubeServiceViewModel()
     {
         FetchVideosCommand = ReactiveCommand.CreateFromTask(FetchVideoAsync);
-        var pathToFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Urls.json"));
+    }
+
+    public void CheckAndDeserializeFile(string pathToFile)
+    {
         if (!File.Exists(pathToFile))
         {
-            //Add dialog-box here
-            
+            MessageBus.Current.SendMessage(new FileNotFoundMessage(pathToFile));
             return;
         }
         DeserializeUrls(pathToFile);
         //preload videos from playlists
         Task.Run(async() => await FetchVideoAsync()).Wait();
+        SubscribeToMessages();
+    }
+
+    private void SubscribeToMessages()
+    {
         MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message =>
         {
             _randomNumber = message.RandomNumber;
@@ -116,7 +124,6 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         }
         //if preview is unavailable (video is private, probably) or there is another exception when we try to get thumbnail 
         //we just should reroll number and try to reload
-        //TODO: add private video to CompletedVideos (?)
         catch (Exception)
         {
             MessageBus.Current.SendMessage(new ThumbnailLoadFailedMessage());

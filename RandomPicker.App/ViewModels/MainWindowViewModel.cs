@@ -20,6 +20,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _clipboardText;
     private static CompletedVideosService _completedVideosService;
     private static Settings _appSettings;
+    private static BrowserService _browserService;
     
    //public
     public bool IsExiting() => _isExiting;
@@ -35,7 +36,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public YoutubeServiceViewModel YoutubeServiceVM { get; }
     public DialogBoxViewModel DialogBoxVM { get; }
     
-    public MainWindowViewModel(SettingsService settingsService, 
+    public MainWindowViewModel(SettingsService settingsService,
+        BrowserService browserService,
         YoutubeServiceViewModel youtubeServiceViewModel,
         DialogBoxViewModel dialogBoxViewModel,
         GenerateRandomViewModel generateRandomViewModel)
@@ -48,6 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase
         GenerateRandomVM = generateRandomViewModel;
         DialogBoxVM = dialogBoxViewModel;
         YoutubeServiceVM = youtubeServiceViewModel;
+        _browserService = browserService;
         SubscribeToMessages();
         ExitCommand = ReactiveCommand.Create(ExecuteExitApplicationCommand);
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
@@ -79,9 +82,22 @@ public partial class MainWindowViewModel : ViewModelBase
         
          if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
-            if (!GenerateRandomVM.IsRollButtonEnabled)
-                UpdateCompletedVideosCommand.Execute(null);
-            desktop.Shutdown();
+             try
+             {
+                 if (!GenerateRandomVM.IsRollButtonEnabled)
+                     UpdateCompletedVideosCommand.Execute(null);
+                 
+                 _browserService.OpenUrlInDefaultBrowser(_clipboardText);
+                 
+                 desktop.Shutdown();
+
+             }
+             catch (Exception ex)
+             {
+                 DialogBoxVM.OpenDialogCommand.Execute($"Error opening URL in default browser: {ex.Message}");
+                 _isExiting = false;
+                 return;
+             }
          }
         _isExiting = false;
     }

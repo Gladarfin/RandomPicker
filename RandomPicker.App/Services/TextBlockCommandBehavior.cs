@@ -11,7 +11,7 @@ public class TextBlockCommandBehavior
 {
     public static readonly AttachedProperty<ICommand> CommandProperty =
         AvaloniaProperty.RegisterAttached<TextBlockCommandBehavior, Interactive, ICommand>(
-            "Command", default(ICommand), false, BindingMode.OneWay);
+            "Command");
 
     public static void SetCommand(Interactive element, ICommand value)
     {
@@ -29,13 +29,10 @@ public class TextBlockCommandBehavior
         {
             if (args.Sender is Interactive interactive)
             {
-                interactive.AddHandler(InputElement.PointerPressedEvent, (sender, e) =>
+                interactive.AddHandler(InputElement.PointerPressedEvent, (_, _) =>
                 {
                     var command = GetCommand(interactive);
-                    if (command?.CanExecute(null) == true)
-                    {
                         command.Execute(null);
-                    }
                 });
             }
         });

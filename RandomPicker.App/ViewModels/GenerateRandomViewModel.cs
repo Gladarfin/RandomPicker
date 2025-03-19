@@ -1,7 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using RandomPicker.App.Models;
+using RandomPicker.App.Services;
 using ReactiveUI;
 
 namespace RandomPicker.App.ViewModels;
@@ -14,6 +18,9 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     private int _randomMaxValue = 100;
     private bool _isRollButtonEnabled;
     private bool _isRerollButtonEnabled;
+    private static Settings _appSettings;
+    private readonly DialogBoxViewModel _dialogBoxViewModel;
+    private readonly string _pathToFileWithCompleted;
     
     //public
     public int RandomNumber
@@ -56,11 +63,17 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     //Commands
     public ICommand GenerateRandomNumberCommand { get; }
     public ICommand RerollRandomNumberCommand { get; }
-    public GenerateRandomViewModel()
+    public GenerateRandomViewModel(SettingsService settingsService,
+        DialogBoxViewModel dialogBoxViewModel)
     {
         _random = new Random();
         IsRollButtonEnabled = true;
         IsRerollButtonEnabled = false;
+        Task.Run(async () => {
+            _appSettings = await settingsService.LoadSettingsAsync();
+        }).Wait();
+        _dialogBoxViewModel = dialogBoxViewModel;
+        _pathToFileWithCompleted  = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithCompleted);
         GenerateRandomNumberCommand = ReactiveCommand.Create(GenerateRandomNumber);
         RerollRandomNumberCommand = ReactiveCommand.Create(RerollRandomNumber);
         SubscribeToMessages();
@@ -73,7 +86,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     }
     private void GenerateRandomNumber()
     {
-        RandomNumber = _random.Next(1, _randomMaxValue);
+        RollNewRandomNumber();
         IsRollButtonEnabled = false;
         IsRerollButtonEnabled = true;
         SendMessageWithRandomNumber();
@@ -81,8 +94,36 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
 
     private void RerollRandomNumber()
     {
-        RandomNumber = _random.Next(1, _randomMaxValue);
+        RollNewRandomNumber();
         SendMessageWithRandomNumber();
+    }
+
+    private void RollNewRandomNumber()
+    {
+        if (!IsFileExists(_pathToFileWithCompleted))
+        {
+            _dialogBoxViewModel.OpenDialogCommand.Execute($"File doesn't exist:\n {_pathToFileWithCompleted}");
+            return;
+        }
+        
+        var json = JsonConvert.DeserializeObject<CompletedVideos>(File.ReadAllText(_pathToFileWithCompleted));
+        
+        while (true)
+        {
+            if (!_appSettings.RandomWithoutRepetitions)
+            {
+                RandomNumber = _random.Next(1, _randomMaxValue);
+                break;
+            }
+            RandomNumber = _random.Next(1, _randomMaxValue);
+            if (!json.CompletedList.Contains(RandomNumber))
+                break;
+        }
+    }
+        
+    private static bool IsFileExists(string filePath)
+    {
+        return File.Exists(filePath);
     }
 
     private void SendMessageWithRandomNumber()

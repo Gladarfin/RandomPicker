@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
@@ -14,7 +11,6 @@ namespace RandomPicker.App.Services;
 public class YoutubeApiService
 {
     private readonly List<string> _videos = [];
-    private Bitmap _thumbnail;
     private static Settings _appSettings;
 
     public YoutubeApiService(SettingsService settingsService)

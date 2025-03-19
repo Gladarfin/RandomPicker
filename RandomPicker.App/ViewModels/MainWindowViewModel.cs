@@ -15,7 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     //private
     private bool _isExiting;
-    private string _pathToCompletedList;
+    private readonly string _pathToCompletedList;
     private int _currentRandomNumber;
     private string _clipboardText;
     private static CompletedVideosService _completedVideosService;
@@ -45,8 +45,8 @@ public partial class MainWindowViewModel : ViewModelBase
         Task.Run(async () => {
             _appSettings = await settingsService.LoadSettingsAsync();
         }).Wait();
-
-        _pathToCompletedList = _appSettings.PathToFileWithCompleted;
+        _pathToCompletedList = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithCompleted);
+        var pathToFileWithUrl = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithUrls);
         GenerateRandomVM = generateRandomViewModel;
         DialogBoxVM = dialogBoxViewModel;
         YoutubeServiceVM = youtubeServiceViewModel;
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TextBlockClickCommand = ReactiveCommand.Create(ExecuteTextBlockClickCommand);
         UpdateCompletedVideosCommand = ReactiveCommand.Create(() => _completedVideosService.UpdateCompletedVideosList());
         ResetCompletedVideosListAsyncCommand = ReactiveCommand.CreateFromTask(async() => await _completedVideosService.ResetListAsync());
-        YoutubeServiceVM.CheckAndDeserializeUrlsFile(_appSettings.PathToFileWithUrls);
+        YoutubeServiceVM.CheckAndDeserializeUrlsFile(pathToFileWithUrl);
     }
 
     private void SubscribeToMessages()
@@ -82,12 +82,15 @@ public partial class MainWindowViewModel : ViewModelBase
         
          if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
          {
+             if (GenerateRandomVM.IsRollButtonEnabled)
+                 desktop.Shutdown();
              try
              {
                  if (!GenerateRandomVM.IsRollButtonEnabled)
                      UpdateCompletedVideosCommand.Execute(null);
                  
-                 _browserService.OpenUrlInDefaultBrowser(_clipboardText);
+                 if (_clipboardText != string.Empty && _appSettings.OpenFileAfterExit)
+                    _browserService.OpenUrlInDefaultBrowser(_clipboardText);
                  
                  desktop.Shutdown();
 
@@ -115,9 +118,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _completedVideosService = new CompletedVideosService(_pathToCompletedList, _currentRandomNumber);
     }
     
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public new event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged(string propertyName)
+    protected new virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

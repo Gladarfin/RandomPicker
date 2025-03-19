@@ -1,8 +1,6 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input.Platform;
-using Avalonia.VisualTree;
 
 namespace RandomPicker.App.Services;
 

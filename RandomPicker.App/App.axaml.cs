@@ -14,7 +14,7 @@ namespace RandomPicker.App;
 
 public partial class App : Application
 {
-    private readonly string _pathToSettingsFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\..\Config\Settings.json"));
+    private string _pathToSettingsFile;
 
     public override void Initialize()
     {
@@ -24,6 +24,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var serviceCollection = new ServiceCollection();
+        _pathToSettingsFile = string.Concat(Path.GetDirectoryName(Environment.ProcessPath), "\\Config\\Settings.json");
         ConfigureServices(serviceCollection);
         var serviceProvider = serviceCollection.BuildServiceProvider();
         

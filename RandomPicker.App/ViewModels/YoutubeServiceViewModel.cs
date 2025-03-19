@@ -16,8 +16,8 @@ namespace RandomPicker.App.ViewModels;
 public class YoutubeServiceViewModel : INotifyPropertyChanged
 {
     //const
-    private const string _videoPrefix = "https://www.youtube.com/watch?v=";
-    private const string _prefixThumbnail = "https://img.youtube.com/vi";
+    private const string VideoPrefix = "https://www.youtube.com/watch?v=";
+    private const string PrefixThumbnail = "https://img.youtube.com/vi";
     //private
     private ListOfUrls _listOfUrls;
     private List<string> _playlists;
@@ -69,7 +69,13 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
         Task.Run(async() => await FetchVideoAsync()).Wait();
         SubscribeToMessages();
     }
-
+    
+    private void DeserializeUrls(string pathToFile)
+    {
+        _listOfUrls = JsonSerializer.Deserialize<ListOfUrls>(File.ReadAllText(pathToFile))!;
+        _playlists = _listOfUrls.Playlists;
+    }
+    
     private void SubscribeToMessages()
     {
         MessageBus.Current.Listen<RandomNumberMessage>().Subscribe(message =>
@@ -78,12 +84,6 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
             UpdateCurrentVideo();
             GetVideoPreview(_videos[_randomNumber - 1]);
         });
-    }
-    
-    private void DeserializeUrls(string pathToFile)
-    {
-        _listOfUrls = JsonSerializer.Deserialize<ListOfUrls>(File.ReadAllText(pathToFile))!;
-        _playlists = _listOfUrls.Playlists;
     }
 
     private async Task FetchVideoAsync()
@@ -94,7 +94,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     
     private void UpdateCurrentVideo()
     {
-        VideoUrl = string.Concat(_videoPrefix, _videos[_randomNumber - 1]);
+        VideoUrl = string.Concat(VideoPrefix, _videos[_randomNumber - 1]);
         MessageBus.Current.SendMessage(new VideoUrlMessage(VideoUrl));
     }
     
@@ -110,7 +110,7 @@ public class YoutubeServiceViewModel : INotifyPropertyChanged
     /// <returns></returns>
     private void GetVideoPreview(string videoId, string thumbnailType = "hqdefault")
     {
-        var newVideoThumbnailUrl = $"{_prefixThumbnail}/{videoId}/{thumbnailType}.jpg";
+        var newVideoThumbnailUrl = $"{PrefixThumbnail}/{videoId}/{thumbnailType}.jpg";
         Task.Run(async() => await GetThumbnailAsync(newVideoThumbnailUrl)).Wait();
     }
     

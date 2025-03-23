@@ -21,6 +21,8 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     private static Settings _appSettings;
     private readonly DialogBoxViewModel _dialogBoxViewModel;
     private readonly string _pathToFileWithCompleted;
+    private int _currentRollsCount;
+    private bool _isReseted = false;
     
     //public
     public int RandomNumber
@@ -73,7 +75,10 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
             _appSettings = await settingsService.LoadSettingsAsync();
         }).Wait();
         _dialogBoxViewModel = dialogBoxViewModel;
-        _pathToFileWithCompleted  = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithCompleted);
+        _pathToFileWithCompleted  = Path.Combine(
+            Path.GetDirectoryName(Environment.ProcessPath), 
+            _appSettings.PathToFileWithCompleted);
+        
         GenerateRandomNumberCommand = ReactiveCommand.Create(GenerateRandomNumber);
         RerollRandomNumberCommand = ReactiveCommand.Create(RerollRandomNumber);
         SubscribeToMessages();
@@ -89,12 +94,25 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
         RollNewRandomNumber();
         IsRollButtonEnabled = false;
         IsRerollButtonEnabled = true;
+        _currentRollsCount++;
         SendMessageWithRandomNumber();
     }
 
     private void RerollRandomNumber()
     {
+        if (_currentRollsCount > _appSettings.MaxRandomNumberRerolls)
+        {
+            if (_isReseted)
+            {
+                _dialogBoxViewModel.OpenDialogCommandAsync.Execute("Random number can't be generated.");
+            }
+            //TODO: change to "Yes/no" choices
+            _dialogBoxViewModel.OpenDialogCommandAsync.Execute(
+                @"Random number can't be generated; maybe you have completed all the videos from the given playlists.
+                  Would you like to try resetting the CompletedList and attempt a reroll?");
+        }
         RollNewRandomNumber();
+        _currentRollsCount++;
         SendMessageWithRandomNumber();
     }
 
@@ -102,7 +120,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     {
         if (!IsFileExists(_pathToFileWithCompleted))
         {
-            _dialogBoxViewModel.OpenDialogCommand.Execute($"File doesn't exist:\n {_pathToFileWithCompleted}");
+            _dialogBoxViewModel.OpenDialogCommandAsync.Execute($"File doesn't exist:\n {_pathToFileWithCompleted}");
             return;
         }
         

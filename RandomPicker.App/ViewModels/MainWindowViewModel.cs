@@ -71,7 +71,7 @@ public partial class MainWindowViewModel : ViewModelBase
             UpdateCompletedVideosService();
         });
         MessageBus.Current.Listen<FileNotFoundMessage>().Subscribe(message => 
-                DialogBoxVM.OpenDialogCommand.Execute($"File doesn't exist:\n {message.PathToFile}")
+                DialogBoxVM.OpenDialogCommandAsync.Execute($"File doesn't exist:\n {message.PathToFile}")
                 );
     }
     
@@ -97,7 +97,7 @@ public partial class MainWindowViewModel : ViewModelBase
              }
              catch (Exception ex)
              {
-                 DialogBoxVM.OpenDialogCommand.Execute($"Error opening URL in default browser: {ex.Message}");
+                 DialogBoxVM.OpenDialogCommandAsync.Execute($"Error opening URL in default browser: {ex.Message}");
                  _isExiting = false;
                  return;
              }
@@ -110,7 +110,7 @@ public partial class MainWindowViewModel : ViewModelBase
         //copy to clipboard
         var clipboard = ClipboardService.Get();
         Task.Run(async() => await clipboard.SetTextAsync(_clipboardText));
-        DialogBoxVM.OpenDialogWithAutoCloseCommand.Execute(null);
+        DialogBoxVM.OpenDialogWithAutoCloseCommandAsync.Execute(null);
     }
     
     private void UpdateCompletedVideosService()

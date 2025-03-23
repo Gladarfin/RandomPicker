@@ -23,5 +23,17 @@
                         IsVisible="{Binding ButtonVisibility}">
                     CLOSE
                 </Button>
+                <StackPanel x:DataType="vm:DialogBoxViewModel" 
+                            Orientation="Horizontal" 
+                            IsVisible="{Binding StackPanelWithChoice}">
+                    <Button Margin="0 16 0 0" 
+                            x:DataType="vm:DialogBoxViewModel"
+                            Command="{Binding CloseDialogBoxWithChoiceCommand}" 
+                            CommandParameter="True">YES</Button>
+                    <Button Margin="0 16 0 0" 
+                            x:DataType="vm:DialogBoxViewModel"
+                            Command="{Binding CloseDialogBoxWithChoiceCommand}" 
+                            CommandParameter="False">NO</Button>
+                </StackPanel>
             </StackPanel>
 </UserControl>

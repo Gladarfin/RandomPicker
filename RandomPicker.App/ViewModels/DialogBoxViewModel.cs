@@ -69,7 +69,7 @@ public class DialogBoxViewModel : ViewModelBase
     public ICommand CloseDialogBoxWithChoiceCommand { get; } = ReactiveCommand.Create<bool>((choice) =>
     {
         DialogHost.Close("MainDialogBox");
-        MessageBus.Current.SendMessage(new DialogBoxClosedWithYesMessage(choice));
+        MessageBus.Current.SendMessage(new DialogBoxWithChoiceClosedWithMessage(choice));
     }, outputScheduler: AvaloniaScheduler.Instance);
     
     public DialogBoxViewModel()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Newtonsoft.Json;
@@ -23,6 +24,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     private readonly string _pathToFileWithCompleted;
     private int _currentRollsCount;
     private bool _isReseted = false;
+    private CompletedVideosService _completedVideosService;
     
     //public
     public int RandomNumber
@@ -98,22 +100,52 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
         SendMessageWithRandomNumber();
     }
 
-    private void RerollRandomNumber()
+    private async Task RerollRandomNumber()
     {
-        if (_currentRollsCount > _appSettings.MaxRandomNumberRerolls)
+        if (CheckIfCurrentRollsExceededMaxRerolls())
         {
-            if (_isReseted)
-            {
-                _dialogBoxViewModel.OpenDialogCommandAsync.Execute("Random number can't be generated.");
-            }
-            //TODO: change to "Yes/no" choices
-            _dialogBoxViewModel.OpenDialogCommandAsync.Execute(
-                @"Random number can't be generated; maybe you have completed all the videos from the given playlists.
-                  Would you like to try resetting the CompletedList and attempt a reroll?");
+            if (CheckIfReseted())
+                return;
+
+            if (!await CheckForUserAnswerInDialogBoxAsync())
+                return;
+            ResetCompletedList();
         }
+        
         RollNewRandomNumber();
         _currentRollsCount++;
         SendMessageWithRandomNumber();
+    }
+
+    private bool CheckIfCurrentRollsExceededMaxRerolls()
+    {
+        return _currentRollsCount > _appSettings.MaxRandomNumberRerolls;
+    }
+
+    private bool CheckIfReseted()
+    {
+        if (!_isReseted) return false;
+        
+        _dialogBoxViewModel.OpenDialogCommandAsync.Execute("Random number can't be generated.");
+        return true;
+    }
+
+    private async Task<bool> CheckForUserAnswerInDialogBoxAsync()
+    {
+        _dialogBoxViewModel.OpenDialogWithChoiceCommandAsync.Execute(
+            """
+            Random number can't be generated; maybe you have completed all the videos from the given playlists.
+            Would you like to try resetting the CompletedList and attempt a reroll?
+            """);
+        var userChoice = await MessageBus.Current.Listen<DialogBoxWithChoiceClosedWithMessage>().FirstAsync();
+        return !userChoice.DialogBoxChoiceIs;
+    }
+
+    private void ResetCompletedList()
+    {
+        _currentRollsCount = 0;
+        _completedVideosService = new CompletedVideosService(_appSettings.PathToFileWithCompleted);
+        Task.Run(async() => await _completedVideosService.ResetListAsync());
     }
 
     private void RollNewRandomNumber()

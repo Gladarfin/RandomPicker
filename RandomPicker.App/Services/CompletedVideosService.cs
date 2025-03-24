@@ -6,7 +6,7 @@ using RandomPicker.App.Models;
 
 namespace RandomPicker.App.Services;
 
-public class CompletedVideosService(string completedVideosFilePath, int currentRandomNumber)
+public class CompletedVideosService(string completedVideosFilePath, int currentRandomNumber = 0)
 {
     private readonly string _completedVideosFilePath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), completedVideosFilePath);
     public void UpdateCompletedVideosList()

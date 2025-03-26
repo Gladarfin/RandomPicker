@@ -32,9 +32,10 @@ module CompletedVideosServiceTests =
             let service = CompletedVideosService(tempFile)
             service.UpdateCompletedVideosList()
             service.ResetListAsync().Wait()
-            let fileContent = File.ReadAllText(tempFile)
-            let deserializedFile = JsonConvert.DeserializeObject<CompletedVideos>(fileContent)
-            deserializedFile.CompletedList |> Assert.Empty
+            File.ReadAllText(tempFile)
+            |> JsonConvert.DeserializeObject<CompletedVideos>
+            |> _.CompletedList
+            |> Assert.Empty
         finally
             cleanup tempFile
 
@@ -54,9 +55,10 @@ type CompletedVideosServiceTheories() =
             let service = CompletedVideosService(tempFile, numberToAdd)
             service.UpdateCompletedVideosList()
             
-            let fileAfterUpdate = File.ReadAllText(tempFile)
-            let deserializedJsonAfterUpdate = JsonConvert.DeserializeObject<CompletedVideos>(fileAfterUpdate)
-            let lastElement = deserializedJsonAfterUpdate.CompletedList |> Seq.last
-            Assert.Equal(numberToAdd, lastElement)                       
+            File.ReadAllText(tempFile)
+            |> JsonConvert.DeserializeObject<CompletedVideos>
+            |> _.CompletedList
+            |> Seq.last
+            |> fun actual -> Assert.Equal(numberToAdd, actual)                     
         finally
             cleanup tempFile

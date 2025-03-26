@@ -89,7 +89,7 @@
                      HorizontalAlignment="Center" 
                      HorizontalContentAlignment="Center" 
                      MinWidth="140"
-                     Command = "{Binding GenerateRandomVM.RerollRandomNumberCommand}"
+                     Command = "{Binding GenerateRandomVM.RerollRandomNumberCommandAsync}"
                      IsEnabled="{Binding GenerateRandomVM.IsRerollButtonEnabled}">Reroll Video</Button> 
             <Button  x:Name="Exit" 
                      Grid.Row="1" 

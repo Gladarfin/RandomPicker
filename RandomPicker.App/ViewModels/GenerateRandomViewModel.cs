@@ -66,7 +66,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     
     //Commands
     public ICommand GenerateRandomNumberCommand { get; }
-    public ICommand RerollRandomNumberCommand { get; }
+    public ICommand RerollRandomNumberCommandAsync { get; }
     public GenerateRandomViewModel(SettingsService settingsService,
         DialogBoxViewModel dialogBoxViewModel)
     {
@@ -82,14 +82,14 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
             _appSettings.PathToFileWithCompleted);
         
         GenerateRandomNumberCommand = ReactiveCommand.Create(GenerateRandomNumber);
-        RerollRandomNumberCommand = ReactiveCommand.Create(RerollRandomNumber);
+        RerollRandomNumberCommandAsync = ReactiveCommand.CreateFromTask(RerollRandomNumberAsync);
         SubscribeToMessages();
     }
     
     private void SubscribeToMessages()
     {
         MessageBus.Current.Listen<VideoCountMessage>().Subscribe(message => RandomMaxValue = message.Count);
-        MessageBus.Current.Listen<ThumbnailLoadFailedMessage>().Subscribe(_ => RerollRandomNumber());
+        MessageBus.Current.Listen<ThumbnailLoadFailedMessage>().Subscribe(_ => Task.Run(async() => await RerollRandomNumberAsync()));
     }
     private void GenerateRandomNumber()
     {
@@ -100,7 +100,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
         SendMessageWithRandomNumber();
     }
 
-    private async Task RerollRandomNumber()
+    private async Task RerollRandomNumberAsync()
     {
         if (CheckIfCurrentRollsExceededMaxRerolls())
         {
@@ -150,7 +150,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
 
     private void RollNewRandomNumber()
     {
-        if (!IsFileExists(_pathToFileWithCompleted))
+        if (_appSettings.RandomWithoutRepetitions && !IsFileExists(_pathToFileWithCompleted))
         {
             _dialogBoxViewModel.OpenDialogCommandAsync.Execute($"File doesn't exist:\n {_pathToFileWithCompleted}");
             return;

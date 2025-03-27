@@ -5,17 +5,22 @@ namespace RandomPicker.App.Services;
 
 public class BrowserService
 {
+    private readonly IBrowserLauncher _browserLauncher;
+
+    public BrowserService() : this(new SystemBrowserLauncher())
+    {
+        
+    }
+    public BrowserService(IBrowserLauncher browserLauncher)
+    {
+        _browserLauncher = browserLauncher;
+    }
+    
     public void OpenUrlInDefaultBrowser(string url)
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-
-
+            _browserLauncher.OpenUrlInBrowser(url);
         }
         catch(Exception ex)
         {

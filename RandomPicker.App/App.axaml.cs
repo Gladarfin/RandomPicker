@@ -57,6 +57,7 @@ public partial class App : Application
     private void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<SettingsService>(_ => new SettingsService(_pathToSettingsFile));
+        services.AddSingleton<IBrowserLauncher, SystemBrowserLauncher>();
         services.AddSingleton<BrowserService>();
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<YoutubeApiService>();

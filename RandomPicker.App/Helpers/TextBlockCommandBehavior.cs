@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 

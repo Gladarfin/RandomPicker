@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
         xmlns:services="clr-namespace:RandomPicker.App.Services"
-        xmlns:views="clr-namespace:RandomPicker.App.Views"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
         Width="400" Height="450"
         x:Class="RandomPicker.App.Views.MainWindow"

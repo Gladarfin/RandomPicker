@@ -17,10 +17,11 @@ public partial class MainWindow : Window
     {
         if (DataContext is MainWindowViewModel viewModel && !viewModel.IsExiting())
         {
-            viewModel.ExitCommand.Execute(null);
+            viewModel.OnWindowClosing();
         }
         
         e.Cancel = true;
         base.OnClosing(e);
     }
+
 }

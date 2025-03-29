@@ -118,6 +118,15 @@ public partial class MainWindowViewModel : ViewModelBase
         _completedVideosService = new CompletedVideosService(_pathToCompletedList, _currentRandomNumber);
     }
     
+    public void OnWindowClosing()
+    {
+        _isExiting = true;
+        if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+    
     public new event PropertyChangedEventHandler? PropertyChanged;
 
     protected new virtual void OnPropertyChanged(string propertyName)

@@ -12,11 +12,11 @@ let cleanup path =
             try File.Delete(path) with _ -> ()
 
 [<Fact>]
-let ``LoadSettingAsync should returns default Settings when file doesn't exists`` () = task {
-    let! result =
+let ``LoadSetting should returns default Settings when file doesn't exists`` () = task {
+    let result =
         Path.Combine(Path.GetTempPath(), "NonExistentSettingsFile.json")
         |> SettingsService
-        |> _.LoadSettingsAsync()
+        |> _.LoadSettings()
    
     Assert.Multiple( fun () ->
         result.OpenFileAfterExit |> Assert.True
@@ -39,9 +39,9 @@ let ``LoadSettingsAsync should returns deserialized settings when file is exists
         )
     let tempTestFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".json")
     do! File.WriteAllTextAsync(tempTestFile, JsonConvert.SerializeObject(testSettings))
-    let! result =
+    let result =
         SettingsService(tempTestFile)
-        |> _.LoadSettingsAsync()
+        |> _.LoadSettings()
     
     Assert.Multiple(fun () -> 
         ("", result.PathToFileWithCompleted) |> Assert.NotEqual<string>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Apis.Services;
@@ -15,35 +16,49 @@ public class YoutubeApiService
 
     public YoutubeApiService(SettingsService settingsService)
     {
-        _appSettings = settingsService.LoadSettings();
+        _appSettings = settingsService.LoadSettings() ?? 
+                       throw new ArgumentNullException(nameof(settingsService), "Settings file is missing.");
+        ValidateSettings();
+    }
+
+    private void ValidateSettings()
+    {
+        if (string.IsNullOrEmpty(_appSettings.ApiKey))
+            throw new ArgumentException("Youtube ApiKey is not configured in Settings.json.");
     }
     
     public async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)
     {
-        var youtubeService = new YouTubeService(new BaseClientService.Initializer()
-        {
-            ApiKey = _appSettings.ApiKey,
-            ApplicationName = _appSettings.ApplicationName
-        });
+        var youtubeService = InitializeNewYoutubeService();
         
         foreach (var list in playlists)
         {
-            var playlistItemRequest = youtubeService.PlaylistItems.List("snippet");
-            playlistItemRequest.PlaylistId = list;
-            playlistItemRequest.MaxResults = 50;
-
-            PlaylistItemListResponse response;
-            do
-            {
-                response = await playlistItemRequest.ExecuteAsync();
-                _videos.AddRange(response.Items.Select(item => item.Snippet.ResourceId.VideoId));
-                playlistItemRequest.PageToken = response.NextPageToken;
-            } while (!string.IsNullOrEmpty(response.NextPageToken));
+            await ProcessPlaylist(youtubeService, list);
         }
         return _videos;
     }
 
-  
+    private YouTubeService InitializeNewYoutubeService()
+    {
+        return new YouTubeService(new BaseClientService.Initializer
+        {
+            ApiKey = _appSettings.ApiKey,
+            ApplicationName = _appSettings.ApplicationName
+        });
+    }
 
-    
+    private async Task ProcessPlaylist(YouTubeService youtubeService, string playlistId)
+    {
+        var playlistItemRequest = youtubeService.PlaylistItems.List("snippet");
+        playlistItemRequest.PlaylistId = playlistId;
+        playlistItemRequest.MaxResults = 50;
+
+        PlaylistItemListResponse response;
+        do
+        {
+            response = await playlistItemRequest.ExecuteAsync();
+            _videos.AddRange(response.Items.Select(item => item.Snippet.ResourceId.VideoId));
+            playlistItemRequest.PageToken = response.NextPageToken;
+        } while (!string.IsNullOrEmpty(response.NextPageToken));
+    }
 }

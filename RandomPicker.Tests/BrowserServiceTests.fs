@@ -19,7 +19,7 @@ let ``OpenUrlInDefaultBrowser should open default browser with provided url`` ()
     verify <@ mockLauncher.OpenUrlInBrowser(testUrl) @> once
         
 [<Fact>]
-let ``OpenUrlInDefaultBrowser should rethrows exceptions from launcher`` () =
+let ``OpenUrlInDefaultBrowser should rethrow exceptions from launcher`` () =
     let expectedEx = Exception("Test error")
     Mock<IBrowserLauncher>()
         .Setup(fun x -> <@ x.OpenUrlInBrowser(any()) @>)

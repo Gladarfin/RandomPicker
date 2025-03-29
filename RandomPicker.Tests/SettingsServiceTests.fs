@@ -12,7 +12,7 @@ let cleanup path =
             try File.Delete(path) with _ -> ()
 
 [<Fact>]
-let ``LoadSetting should returns default Settings when file doesn't exists`` () = task {
+let ``LoadSetting should return default Settings when file doesn't exists`` () = task {
     let result =
         Path.Combine(Path.GetTempPath(), "NonExistentSettingsFile.json")
         |> SettingsService
@@ -30,7 +30,7 @@ let ``LoadSetting should returns default Settings when file doesn't exists`` () 
 }
 
 [<Fact>]
-let ``LoadSettingsAsync should returns deserialized settings when file is exists`` () = task {
+let ``LoadSettingsAsync should return deserialized settings when file is exists`` () = task {
     let testSettings = Settings(
         PathToFileWithCompleted = @"C:\temp\CompletedList.json",
         PathToFileWithUrls = @"C:\temp\Urls.json",

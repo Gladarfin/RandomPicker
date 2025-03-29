@@ -5,9 +5,9 @@ using RandomPicker.App.Models;
 
 namespace RandomPicker.App.Services;
 
-public class SettingsService(string settingsFilePath)
+public  class SettingsService(string settingsFilePath)
 {
-    public Settings LoadSettings()
+    public virtual Settings LoadSettings()
     {
         if (!File.Exists(settingsFilePath))
         {

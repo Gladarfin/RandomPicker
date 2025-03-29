@@ -15,10 +15,7 @@ public class YoutubeApiService
 
     public YoutubeApiService(SettingsService settingsService)
     {
-        Task.Run(async () =>
-        {
-            _appSettings = await settingsService.LoadSettingsAsync();
-        }).Wait();
+        _appSettings = settingsService.LoadSettings();
     }
     
     public async Task<List<string>> CreateListOfAllVideosFromPlaylists(List<string> playlists)

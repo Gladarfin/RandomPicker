@@ -42,9 +42,7 @@ public partial class MainWindowViewModel : ViewModelBase
         DialogBoxViewModel dialogBoxViewModel,
         GenerateRandomViewModel generateRandomViewModel)
     {
-        Task.Run(async () => {
-            _appSettings = await settingsService.LoadSettingsAsync();
-        }).Wait();
+        _appSettings = settingsService.LoadSettings();
         _pathToCompletedList = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithCompleted);
         var pathToFileWithUrl = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), _appSettings.PathToFileWithUrls);
         GenerateRandomVM = generateRandomViewModel;

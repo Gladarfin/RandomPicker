@@ -7,13 +7,13 @@ namespace RandomPicker.App.Services;
 
 public class SettingsService(string settingsFilePath)
 {
-    public async Task<Settings> LoadSettingsAsync()
+    public Settings LoadSettings()
     {
         if (!File.Exists(settingsFilePath))
         {
             return new Settings();
         }
-        var json = await File.ReadAllTextAsync(settingsFilePath);
+        var json = File.ReadAllText(settingsFilePath);
         return JsonConvert.DeserializeObject<Settings>(json) ?? new Settings();
     }
 }

@@ -73,9 +73,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
         _random = new Random();
         IsRollButtonEnabled = true;
         IsRerollButtonEnabled = false;
-        Task.Run(async () => {
-            _appSettings = await settingsService.LoadSettingsAsync();
-        }).Wait();
+        _appSettings = settingsService.LoadSettings();
         _dialogBoxViewModel = dialogBoxViewModel;
         _pathToFileWithCompleted  = Path.Combine(
             Path.GetDirectoryName(Environment.ProcessPath), 

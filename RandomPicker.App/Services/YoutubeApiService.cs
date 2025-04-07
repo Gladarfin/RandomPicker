@@ -35,7 +35,8 @@ public class YoutubeApiService
         {
             await ProcessPlaylist(youtubeService, list);
         }
-        return _videos;
+        //sort list of videos to ensure that we get same order
+        return _videos.OrderBy(x => x).ToList();
     }
 
     private YouTubeService InitializeNewYoutubeService()

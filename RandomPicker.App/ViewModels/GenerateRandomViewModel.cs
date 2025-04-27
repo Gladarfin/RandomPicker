@@ -91,6 +91,7 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
     }
     private void GenerateRandomNumber()
     {
+        _currentRollsCount = 0;
         RollNewRandomNumber();
         IsRollButtonEnabled = false;
         IsRerollButtonEnabled = true;
@@ -106,7 +107,10 @@ public class GenerateRandomViewModel : INotifyPropertyChanged
                 return;
 
             if (!await CheckForUserAnswerInDialogBoxAsync())
+            {
+                _currentRollsCount = 0;
                 return;
+            }
             ResetCompletedList();
         }
         

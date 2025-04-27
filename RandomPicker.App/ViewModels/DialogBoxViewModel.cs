@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.ReactiveUI;
@@ -66,9 +67,16 @@ public class DialogBoxViewModel : ViewModelBase
         DialogHost.Close("MainDialogHost");
     }, outputScheduler: AvaloniaScheduler.Instance);
 
-    public ICommand CloseDialogBoxWithChoiceCommand { get; } = ReactiveCommand.Create<bool>((choice) =>
+    public ICommand CloseDialogBoxWithChoiceCommand { get; } = ReactiveCommand.Create<object>((param) =>
     {
-        DialogHost.Close("MainDialogBox");
+        var choice = param switch
+        {
+            bool b => b,
+            string s => bool.Parse(s),
+            _ => throw new ArgumentException("Parameter must be a boolean or a boolean string")
+        };
+        
+        DialogHost.Close("MainDialogHost");
         MessageBus.Current.SendMessage(new DialogBoxWithChoiceClosedWithMessage(choice));
     }, outputScheduler: AvaloniaScheduler.Instance);
     
